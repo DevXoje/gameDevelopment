@@ -1,26 +1,24 @@
 # 🎮 Game Design Document (GDD)
 
+> **Actualizado desde docs/NOSOTROS.md — revisar y validar (fecha: 2026-03-28, autor: integración automática desde NOSOTROS.md)**
+
 **Título del Juego:** TODO: NOMBRE DEL JUEGO  
 **Autor/es:** TODO: NOMBRE DEL EQUIPO  
-**Versión:** 0.1 — Borrador inicial  
-**Fecha:** TODO: FECHA  
+**Versión:** 0.2 — Integración de contenido desde NOSOTROS.md  
+**Fecha:** 2026-03-28  
 **Estado:** En elaboración  
 
 ---
 
 ## 1. Resumen Ejecutivo
 
-TODO: Escribe aquí un párrafo de 3-5 oraciones que explique de qué va el juego, qué lo hace único y para quién es. Este párrafo debe poder leerse de forma aislada y dejar claro el concepto central.
-
-_Ejemplo: "TODO_NOMBRE es un juego de plataformas 2D con mecánicas de gravedad inversa para PC y consola. El jugador controla a un personaje que puede invertir la gravedad en tiempo real para resolver puzzles y superar enemigos. Está dirigido a jugadores casuales y mid-core de 14-30 años que disfrutan de juegos tipo Celeste o VVVVVV."_
+Juego de supervivencia por rondas con vista top-down 2D y combate cuerpo a cuerpo de estilo medieval. Cada ronda aparecen oleadas de enemigos que entran por puntos fijos del mapa y persiguen al jugador. Eliminar enemigos otorga puntos que se pueden gastar para desbloquear nuevas zonas del mapa (con más entradas de enemigos) o para adquirir armas mejores. Las rondas son infinitas y escalan en dificultad progresivamente (más enemigos, más resistentes). La propuesta de valor central es el loop "aguanta todo lo que puedas" con conocimiento creciente de las mecánicas para superar el récord propio.
 
 ---
 
 ## 2. Elevator Pitch
 
-> TODO: Una sola frase que defina el juego. Máximo 2 líneas.
->
-> _Ejemplo: "Es como Celeste pero con mecánicas de gravedad inversa y un sistema de narrativa no lineal."_
+> Es como los Zombies de Call of Duty Black Ops 1 pero en 2D con vista top-down y con armas medievales (espadas, etc.) en vez de armas de fuego.
 
 ---
 
@@ -28,18 +26,18 @@ _Ejemplo: "TODO_NOMBRE es un juego de plataformas 2D con mecánicas de gravedad 
 
 | Plataforma | Prioridad | Notas |
 |---|---|---|
-| TODO: PC (Steam) | Alta | Plataforma principal |
-| TODO: Nintendo Switch | Media | Port secundario |
+| PC | Alta | Plataforma principal |
+| TODO: Nintendo Switch | Baja | A evaluar post-lanzamiento |
 | TODO: Mobile (iOS/Android) | Baja | A evaluar post-MVP |
 
 ---
 
 ## 4. Público Objetivo
 
+- **Perfil:** Jugadores que disfrutan de superarse cada partida y llegar más lejos al conocer cada vez mejor las mecánicas del juego.
 - **Edad:** TODO: rango de edad (ej. 16-35 años)
-- **Perfil:** TODO: tipo de jugador (ej. casual, hardcore, fan del género)
-- **Géneros de referencia:** TODO: lista de géneros que juega el público objetivo
-- **Juegos de referencia (competencia/inspiración):** TODO: nombres de juegos similares
+- **Géneros de referencia:** Survival horde, roguelite, acción top-down
+- **Juegos de referencia (competencia/inspiración):** Call of Duty Zombies (Black Ops 1), Enter the Gungeon, Nuclear Throne
 
 ---
 
@@ -49,22 +47,23 @@ _Ejemplo: "TODO_NOMBRE es un juego de plataformas 2D con mecánicas de gravedad 
 
 El MVP debe ser jugable, autocontenido y representativo de la propuesta de valor central.
 
-- [ ] TODO: Funcionalidad MVP 1 (ej. "1 nivel completo jugable de principio a fin")
-- [ ] TODO: Funcionalidad MVP 2 (ej. "Mecánica principal funcionando al 100%")
-- [ ] TODO: Funcionalidad MVP 3
-- [ ] TODO: Funcionalidad MVP 4
-- [ ] TODO: Funcionalidad MVP 5
+- [ ] Un mapa con dos o tres zonas desbloqueables
+- [ ] Al menos tres o cuatro armas: dos con estilo de combate distinto y dos más potentes pero más caras
+- [ ] Dos tipos de enemigos: uno normal (lento, tipo zombie) y uno más rápido que aparece ocasionalmente
+- [ ] Sistema de vida: el jugador aguanta 3 golpes como máximo; al pasar 1 minuto sin recibir daño, se cura un punto de vida
+- [ ] TODO: Sistema de puntos funcional (obtención al eliminar enemigos y gasto en zonas del mapa)
 
 ### 5.2 Versión Completa (Full Release)
 
-- TODO: Feature adicional 1
-- TODO: Feature adicional 2
-- TODO: Feature adicional 3
+- TODO: Más mapas y zonas desbloqueables
+- TODO: Más tipos de enemigos y jefes de ronda
+- TODO: Más variedad de armas y sistema de mejoras
+- TODO: Tabla de puntuaciones / leaderboard
 
 ### 5.3 Fuera de Scope (explícitamente excluido)
 
-- TODO: Feature que NO haremos (ej. "Multijugador online en v1")
-- TODO: Feature que NO haremos
+- TODO: Multijugador online en v1
+- TODO: Historia / narrativa extensa (el juego es arcade puro)
 
 ---
 
@@ -72,28 +71,29 @@ El MVP debe ser jugable, autocontenido y representativo de la propuesta de valor
 
 ### 6.1 Mecánica Core (Loop Principal)
 
-TODO: Describe el loop de juego principal en 3-5 pasos.
-
-1. **Acción del jugador:** TODO (ej. "El jugador explora el nivel")
-2. **Respuesta del sistema:** TODO (ej. "El entorno reacciona con obstáculos dinámicos")
-3. **Feedback:** TODO (ej. "El jugador recibe feedback visual y sonoro inmediato")
-4. **Recompensa/Progresión:** TODO (ej. "Desbloquea nuevo área o habilidad")
+1. **Inicio de ronda:** Aparece una oleada de enemigos que entran por puntos fijos del mapa y persiguen al jugador.
+2. **Combate:** El jugador elimina enemigos con armas cuerpo a cuerpo; cada muerte otorga puntos.
+3. **Gasto de puntos:** Entre o durante rondas, el jugador puede desbloquear zonas del mapa o comprar armas mejores.
+4. **Escalado:** Cada ronda aumenta el número de enemigos y su resistencia.
+5. **Fin de partida:** El jugador pierde cuando recibe demasiado daño; el objetivo es sobrevivir el mayor número de rondas posible.
 
 ### 6.2 Mecánicas Secundarias
 
 | Mecánica | Descripción | Prioridad |
 |---|---|---|
-| TODO: Mecánica A | TODO: descripción breve | Alta |
-| TODO: Mecánica B | TODO: descripción breve | Media |
-| TODO: Mecánica C | TODO: descripción breve | Baja |
+| Zonas desbloqueables | Gastar puntos para abrir nuevas áreas del mapa (más espacio pero más entradas de enemigos) | Alta |
+| Tipos de terreno | Distintos terrenos modifican la velocidad de movimiento del jugador y de los enemigos | Media |
+| Curación por tiempo | Al pasar 1 minuto sin recibir daño, se recupera 1 punto de vida | Alta |
+| Stamina | Atacar y esprintar consume estamina; gestión de recurso clave | Alta |
+| Armas situacionales | Algunas armas son más eficaces en determinadas situaciones (rango, velocidad, daño en área) | Media |
 
 ### 6.3 Verbos del Jugador
 
-> Los verbos son las acciones que el jugador puede realizar. Mantén la lista corta y coherente.
-
-- **TODO: Verbo 1** (ej. Correr, Saltar, Atacar)
-- **TODO: Verbo 2**
-- **TODO: Verbo 3**
+- **Moverse** (WASD / stick izquierdo)
+- **Atacar** (ataque principal y ataque secundario)
+- **Esprintar** (consume estamina)
+- **Cambiar de arma**
+- **Interactuar** (gastar puntos en zonas de compra/desbloqueo)
 
 ---
 
@@ -101,17 +101,19 @@ TODO: Describe el loop de juego principal en 3-5 pasos.
 
 ### 7.1 Reglas Fundamentales
 
-- TODO: Regla 1 (ej. "El jugador pierde una vida al caer al vacío")
-- TODO: Regla 2 (ej. "Los enemigos respawnean solo si el jugador muere")
-- TODO: Regla 3
+- El jugador puede recibir un máximo de 3 golpes antes de morir.
+- Al transcurrir 1 minuto sin recibir daño, se recupera 1 punto de vida.
+- Los enemigos siempre entran por puntos fijos del mapa y persiguen al jugador.
+- Cada ronda aumenta el número de enemigos y su resistencia.
+- Los puntos se obtienen al eliminar enemigos.
 
 ### 7.2 Condición de Victoria
 
-TODO: ¿Cuándo gana el jugador? ¿Qué significa "ganar" en este juego?
+El juego no tiene fin: el objetivo es sobrevivir el máximo número de rondas posible y superar el récord personal (y, en el futuro, el de otros jugadores).
 
 ### 7.3 Condición de Derrota
 
-TODO: ¿Cuándo pierde el jugador? ¿Hay un game over? ¿Cómo funciona el respawn/retry?
+El jugador pierde cuando recibe el cuarto golpe (agota sus 3 puntos de vida). Se muestra la ronda alcanzada y los puntos obtenidos.
 
 ---
 
@@ -119,41 +121,43 @@ TODO: ¿Cuándo pierde el jugador? ¿Hay un game over? ¿Cómo funciona el respa
 
 ### 8.1 Estructura de Progresión
 
-TODO: Describe cómo avanza el jugador. Ejemplos: niveles lineales, mundo abierto, árbol de habilidades, etc.
+Progresión dentro de la partida: el jugador acumula puntos, desbloquea zonas y mejora su arsenal. No hay progresión persistente entre partidas en el MVP (cada partida empieza desde cero). TODO: evaluar si añadir desbloqueables persistentes en la versión completa.
 
 ### 8.2 Curva de Dificultad
 
-TODO: Describe la curva de dificultad esperada. Usa una tabla o diagrama de texto.
+Escalado lineal de dificultad por ronda: más enemigos y mayor resistencia en cada oleada sucesiva. El jugador compensa con mejores armas y conocimiento del mapa.
 
 ```
 Dificultad
   ^
+  |                          /-----
+  |                    /----
   |              /----
   |         /---
   |    /----
   |---/
-  +-----------------> Tiempo / Progresión
-   Tut  Nivel1  Nivel2  Nivel3  Boss
+  +---------------------------------> Ronda
+   R1   R3   R5   R7   R10  R15  ...
 ```
 
 ### 8.3 Sistemas de Recompensa
 
-- TODO: Recompensa tipo 1 (ej. "Coleccionables desbloqueables")
-- TODO: Recompensa tipo 2 (ej. "Logros/Achievements")
-- TODO: Recompensa tipo 3
+- **Puntos:** Moneda de progresión dentro de la partida.
+- **Desbloqueo de zonas:** Amplía el mapa disponible.
+- **Armas mejores:** Aumentan las opciones tácticas del jugador.
+- TODO: Tabla de puntuaciones (leaderboard) en versión completa.
 
 ---
 
-## 9. Economía del Juego (si aplica)
+## 9. Economía del Juego
 
-TODO: Si el juego tiene recursos, moneda, inventario o sistema de crafting, descríbelo aquí. Si no aplica, eliminar esta sección.
+Los puntos son la única moneda del juego. Se obtienen exclusivamente eliminando enemigos y se gastan en zonas especiales del mapa para:
 
 | Recurso | Cómo se obtiene | Cómo se gasta | Límite |
 |---|---|---|---|
-| TODO: Moneda/Recurso 1 | TODO | TODO | TODO |
-| TODO: Moneda/Recurso 2 | TODO | TODO | TODO |
+| Puntos | Eliminar enemigos | Desbloquear zonas / Comprar armas | Sin límite (acumulables) |
 
-**Modelo de monetización:** TODO: free-to-play / premium / DLC / ninguno
+**Modelo de monetización:** Premium (pago único). TODO: confirmar modelo con el equipo.
 
 ---
 
@@ -161,35 +165,42 @@ TODO: Si el juego tiene recursos, moneda, inventario o sistema de crafting, desc
 
 ### 10.1 Esquema de Controles
 
-#### Teclado / Ratón
+#### Teclado
 | Acción | Tecla |
 |---|---|
-| TODO: Moverse | WASD / Flechas |
-| TODO: Saltar | Espacio |
-| TODO: Atacar | Clic izquierdo |
-| TODO: Menú pausa | Escape |
+| Moverse | WASD |
+| Ataque principal | TODO: botón por definir (ej. clic izquierdo / J) |
+| Ataque secundario | TODO: botón por definir (ej. clic derecho / K) |
+| Cambiar de arma | TODO: botón por definir (ej. Q / rueda del ratón) |
+| Esprintar | TODO: botón por definir (ej. Shift) |
+| Interactuar (zonas de compra) | TODO: botón por definir (ej. E / F) |
+| Menú pausa | Escape |
 
-#### Mando (Gamepad)
+#### Mando (Gamepad) — Compatibilidad completa
 | Acción | Botón |
 |---|---|
-| TODO: Moverse | Stick izquierdo |
-| TODO: Saltar | TODO: Botón |
-| TODO: Atacar | TODO: Botón |
+| Moverse | Stick izquierdo |
+| Ataque principal | TODO: botón por definir |
+| Ataque secundario | TODO: botón por definir |
+| Cambiar de arma | TODO: botón por definir |
+| Esprintar | TODO: botón por definir |
+| Interactuar | TODO: botón por definir |
 
 ### 10.2 HUD (Heads-Up Display)
 
-TODO: Describe los elementos del HUD. Lista qué información ve el jugador en pantalla en todo momento.
+Los siguientes elementos se muestran en pantalla durante el juego:
 
-- **Arriba-izquierda:** TODO (ej. Vida / Salud)
-- **Arriba-derecha:** TODO (ej. Puntuación / Monedas)
-- **Abajo-izquierda:** TODO (ej. Inventario rápido)
-- **Abajo-derecha:** TODO (ej. Minimapa)
+- **Vida del jugador:** Indicador de los puntos de vida actuales (máx. 3).
+- **Arma equipada:** Nombre o icono del arma actualmente en uso.
+- **Ronda actual:** Número de ronda en curso.
+- TODO: Indicador de puntos acumulados (a confirmar si va en HUD o en zonas de compra).
+- TODO: Barra de estamina.
 
 ---
 
 ## 11. UI/UX — Flujo de Pantallas
 
-TODO: Describe el flujo de navegación de menús/pantallas. Puedes usar un diagrama de texto.
+TODO: Describir el flujo de navegación de menús/pantallas. Puedes usar un diagrama de texto.
 
 ```
 [Inicio/Splash] → [Menú Principal]
@@ -197,13 +208,11 @@ TODO: Describe el flujo de navegación de menús/pantallas. Puedes usar un diagr
               ┌─────────┼─────────┐
            [Jugar]  [Opciones] [Créditos]
               |
-         [Selección de Nivel / Mundo]
-              |
-          [Gameplay]
+          [Gameplay — Ronda activa]
               |
          [Pausa] → [Continuar / Menú Principal / Reiniciar]
               |
-          [Game Over / Victoria]
+          [Game Over — Pantalla de resultados: ronda alcanzada + puntos]
 ```
 
 **Principios UX:**
@@ -214,39 +223,23 @@ TODO: Describe el flujo de navegación de menús/pantallas. Puedes usar un diagr
 
 ## 12. Narrativa (si aplica)
 
-TODO: Si el juego tiene historia, rellena esta sección. Si es arcade puro sin narrativa, eliminarla.
+El juego es arcade puro sin narrativa explícita en el MVP. Si se incorpora contexto narrativo (ambientación medieval, razón de los ataques, etc.) se documentará aquí en versiones futuras.
 
-### 12.1 Premisa
-
-TODO: ¿Cuál es el punto de partida de la historia? 2-3 oraciones.
-
-### 12.2 Personajes Principales
-
-| Personaje | Rol | Descripción breve |
-|---|---|---|
-| TODO: Protagonista | Héroe | TODO: descripción |
-| TODO: Antagonista | Villano | TODO: descripción |
-
-### 12.3 Estructura Narrativa
-
-TODO: Describe el arco narrativo general (inicio, nudo, desenlace) o el tipo de narrativa (emergente, lineal, no lineal).
+- TODO: Definir si se añade ambientación narrativa mínima (ej. un párrafo de lore en el menú).
 
 ---
 
 ## 13. Level Design — Plantilla de Niveles
 
-> Usa esta plantilla para documentar cada nivel del juego.
+> El juego tiene un único mapa en el MVP con zonas desbloqueables. Usa esta plantilla para documentar cada zona/mapa adicional.
 
-### Nivel X: TODO: NOMBRE DEL NIVEL
+### Mapa 1 (MVP): TODO: NOMBRE DEL MAPA
 
-- **Número de nivel:** TODO
-- **Bioma/Tema visual:** TODO (ej. Bosque, Ciudad, Espacio)
-- **Objetivo del nivel:** TODO (¿qué debe hacer el jugador para completarlo?)
-- **Mecánicas introducidas:** TODO (¿qué mecánica nueva aparece aquí por primera vez?)
-- **Mecánicas practicadas:** TODO (¿qué mecánicas anteriores se refuerzan?)
-- **Enemigos presentes:** TODO
-- **Duración estimada:** TODO (ej. 5-10 minutos para un jugador medio)
-- **Boceto/Layout:** TODO: añadir imagen o descripción del layout del nivel
+- **Número de zonas desbloqueables:** 2 o 3
+- **Bioma/Tema visual:** TODO (ej. fortaleza medieval, aldea, mazmorra)
+- **Puntos de entrada de enemigos:** Fijos por zona; se añaden al desbloquear nuevas zonas
+- **Zonas de compra/interacción:** Puntos donde gastar puntos para armas o desbloquear zonas
+- **Mecánicas introducidas:** Loop principal completo
 - **Notas de diseño:** TODO
 
 ---
@@ -255,7 +248,7 @@ TODO: Describe el arco narrativo general (inicio, nudo, desenlace) o el tipo de 
 
 ### 14.1 Estilo Visual
 
-TODO: Describe el estilo visual objetivo. Ejemplos: pixel art 16-bit, low poly 3D, acuarela 2D, cartoon cel-shaded, etc.
+2D top-down. TODO: definir estilo gráfico específico (ej. pixel art, vector, etc.).
 
 **Paleta de colores principal:** TODO (puedes pegar códigos hex o describir la paleta)
 
@@ -263,12 +256,12 @@ TODO: Describe el estilo visual objetivo. Ejemplos: pixel art 16-bit, low poly 3
 
 | Referencia | Por qué la usamos |
 |---|---|
-| TODO: Juego/Película/Arte | TODO: aspecto específico que tomamos de referencia |
-| TODO: Juego/Película/Arte | TODO |
+| Call of Duty Zombies (Black Ops 1) | Referencia de gameplay y atmósfera de tensión creciente |
+| TODO: Juego/Arte adicional | TODO: aspecto específico |
 
 ### 14.3 Personajes — Guía Visual
 
-TODO: Describe el look & feel de los personajes principales. Si hay concept art, enlazarlo aquí.
+TODO: Describir el look & feel del personaje jugable y los tipos de enemigos.
 
 ---
 
@@ -276,7 +269,7 @@ TODO: Describe el look & feel de los personajes principales. Si hay concept art,
 
 ### 15.1 Mood / Atmósfera
 
-TODO: ¿Cómo quieres que se sienta el jugador? (ej. tenso, relajado, épico, misterioso)
+TODO: ¿Cómo quieres que se sienta el jugador? (ej. tensión creciente, urgencia, supervivencia desesperada)
 
 ### 15.2 Referencias Sonoras
 
@@ -288,8 +281,8 @@ TODO: ¿Cómo quieres que se sienta el jugador? (ej. tenso, relajado, épico, mi
 ### 15.3 Diseño de Sonido
 
 - **Música dinámica:** TODO: sí/no y descripción breve
-- **SFX principales:** TODO: lista de efectos de sonido críticos
-- **Voz en off / Diálogos:** TODO: sí/no
+- **SFX principales:** TODO: sonidos de combate cuerpo a cuerpo, entrada de enemigos, compra/desbloqueo
+- **Voz en off / Diálogos:** TODO: sí/no (posiblemente no en MVP)
 
 ---
 
@@ -299,9 +292,9 @@ TODO: Define cómo medirás el éxito del juego. Aplica tanto en playtest como p
 
 | Métrica | Objetivo | Cómo medirla |
 |---|---|---|
-| Tasa de completación del tutorial | TODO: >80% | Analytics in-game |
+| Ronda media alcanzada en playtest | TODO: definir baseline | Observación directa |
 | Tiempo de sesión medio | TODO: >15 min | Analytics |
-| Retención D1 / D7 / D30 | TODO: X% / Y% / Z% | Backend |
+| Retención D1 / D7 | TODO: X% / Y% | Backend |
 | TODO: Métrica adicional | TODO | TODO |
 
 ---
@@ -310,9 +303,10 @@ TODO: Define cómo medirás el éxito del juego. Aplica tanto en playtest como p
 
 | Riesgo | Probabilidad | Impacto | Mitigación |
 |---|---|---|---|
-| TODO: Scope creep | Media | Alta | Mantener MVP estricto; revisión semanal |
-| TODO: Performance en plataforma objetivo | Media | Alta | Profiling temprano; decisiones de engine claras |
-| TODO: Mecánica core poco divertida | Media | Crítica | Prototipo jugable antes de producción completa |
+| Scope creep en tipos de enemigos y armas | Media | Alta | Mantener MVP estricto (2 enemigos, 3-4 armas); revisión semanal |
+| Loop de rondas repetitivo y poco variado | Media | Crítica | Prototipo jugable temprano; playtest con jugadores externos |
+| Desequilibrio en economía de puntos | Media | Alta | Ajuste numérico iterativo en playtests |
+| Performance en mapas con muchos enemigos | Baja | Media | Profiling temprano; decidir límite de enemigos por ronda |
 | TODO: Riesgo adicional | TODO | TODO | TODO |
 
 ---
@@ -321,13 +315,18 @@ TODO: Define cómo medirás el éxito del juego. Aplica tanto en playtest como p
 
 > El MVP está listo cuando todos estos ítems están marcados.
 
-- [ ] TODO: Mecánica core implementada y probada
-- [ ] TODO: Al menos 1 nivel completo jugable de principio a fin
-- [ ] TODO: Menú principal funcional (jugar, salir)
-- [ ] TODO: Sistema de guardado/carga básico (si aplica)
-- [ ] TODO: Sin bugs bloqueantes durante 30 min de juego continuo
-- [ ] TODO: Build exportable a la plataforma objetivo principal
-- [ ] TODO: Playtest con al menos 3 personas externas completado
+- [ ] Loop de rondas funcional (spawn de enemigos, persecución, escalado por ronda)
+- [ ] Sistema de puntos funcional (obtención y gasto)
+- [ ] Mapa con 2-3 zonas desbloqueables operativas
+- [ ] Al menos 3-4 armas implementadas con comportamientos distintos
+- [ ] 2 tipos de enemigos (lento/normal y rápido/ocasional)
+- [ ] Sistema de vida (3 golpes máx., curación por tiempo)
+- [ ] Stamina para ataques y esprint
+- [ ] HUD con vida, arma equipada y ronda actual
+- [ ] Controles con teclado y compatibilidad con mando
+- [ ] Sin bugs bloqueantes durante 30 min de juego continuo
+- [ ] Build exportable a PC
+- [ ] Playtest con al menos 3 personas externas completado
 
 ---
 
@@ -335,10 +334,14 @@ TODO: Define cómo medirás el éxito del juego. Aplica tanto en playtest como p
 
 > Sección libre para apuntes rápidos del equipo. Mover los ítems decididos a su sección correspondiente.
 
-- TODO: Pendiente 1
-- TODO: Pendiente 2
-- TODO: Pendiente 3
+- TODO: Definir nombre del juego
+- TODO: Definir nombre del equipo / autores
+- TODO: Confirmar mapeo exacto de botones de mando y teclado
+- TODO: Definir si la stamina tiene barra visible en HUD o indicador diferente
+- TODO: Aclarar si los puntos acumulados entre compras se muestran en HUD permanente o sólo en zonas de compra
+- TODO: Definir estilo visual (pixel art, vector, etc.)
+- TODO: Definir si habrá progresión persistente entre partidas (desbloqueables permanentes) o cada partida empieza desde cero
 
 ---
 
-_Documento generado automáticamente como plantilla. Versión: 0.1 — Rellenar con el equipo._
+_Documento actualizado con contenido base desde docs/NOSOTROS.md (2026-03-28). Versión: 0.2 — Revisar y validar con el equipo._
