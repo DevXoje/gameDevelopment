@@ -224,7 +224,154 @@ func start_new_round() -> void:
     round_changed.emit(current_round)
 ```
 
-### 4.1.1 Autoloads implementados — Skeletons (2026-03-29)
+---
+
+## 4.2 Logging y Observabilidad — Autoload `Logging` (2026-03-29)
+
+> **Estado:** Implementado. Script en `scripts/autoload/Logging.gd`, registrado en `project.godot`.
+
+El Autoload `Logging` provee observabilidad local robusta mediante escritura de eventos en formato **JSON-lines** en `papa-gallo/logs/session_<id>.log`.
+
+### API pública
+
+```gdscript
+# Registrar cualquier evento desde cualquier script
+Logging.log("info", "my_event", {"key": "value"})
+
+# Forzar escritura a disco (útil antes de operaciones críticas)
+Logging.flush()
+
+# Obtener el ID de sesión actual (para correlacionar eventos)
+var sid := Logging.get_session_id()
+
+# Obtener la ruta absoluta del log actual
+var path := Logging.get_log_path()
+```
+
+### Parámetros configurables (export var)
+
+| Variable | Tipo | Default | Descripción |
+|---|---|---|---|
+| `auto_flush_count` | int | 20 | Eventos en buffer antes de flush automático |
+| `auto_flush_interval` | float | 10.0 | Segundos entre flushes por Timer |
+| `max_file_size_bytes` | int | 2 MB | Tamaño máximo antes de rotar el log |
+| `max_log_files` | int | 10 | Archivos máximos en `logs/` antes de purgar los más viejos |
+| `enable_remote_upload` | bool | **false** | Activa upload remoto (Option B — no implementado) |
+| `remote_endpoint` | String | `""` | Endpoint de la API remota (Option B) |
+
+### Ejemplo de línea en el log
+
+```json
+{"ts":"2026-03-29T10:15:01Z","session_id":"20260329_101501_1234","version":"0.1.0","platform":"macOS","level":"info","event":"round_started","data":{"round":1,"spawn_count":3}}
+```
+
+### Limitaciones conocidas
+
+- Las escrituras son **síncronas** (open/write/close por flush) — evitar `log()` en `_physics_process()`.
+- En modo headless (scripts de smoke test), el Timer no está disponible; se usa `auto_flush_count = 1` para flush inmediato.
+- Los archivos de log **no están encriptados** — no incluir PII en los campos `data`.
+
+---
+
+## 4.3 Option B — Integración Remota de Telemetría (Recomendada antes del lanzamiento)
+
+> **Estado:** NO implementada. El Autoload `Logging` tiene los campos `enable_remote_upload` y `remote_endpoint` preparados, pero la lógica de upload queda pendiente. Esta sección documenta la arquitectura recomendada.
+
+### Motivación
+
+La observabilidad local (JSON-lines en disco) es suficiente durante el desarrollo y QA interno. Sin embargo, antes del lanzamiento público necesitamos:
+
+1. **Errores en producción** — capturar crashes y excepciones de jugadores reales.
+2. **Métricas de gameplay** — entender hasta qué ronda llegan los jugadores, dónde mueren, qué armas usan.
+3. **Datos agregados** — sin acceso físico a la máquina del jugador, los logs locales son invisibles.
+
+### Opción B.1 — Sentry (para errores y crashes)
+
+**Propósito:** Capturar excepciones, crashes y errores en tiempo real desde builds de producción.
+
+**Integración en Godot 4:**
+
+```gdscript
+# En Logging.gd — _upload_batch() (implementar cuando se active enable_remote_upload)
+func _upload_batch(events: Array[String]) -> void:
+    if not enable_remote_upload or remote_endpoint.is_empty():
+        return
+    var http := HTTPRequest.new()
+    add_child(http)
+    var payload := JSON.stringify({
+        "dsn": remote_endpoint,   # DSN de Sentry
+        "events": events,
+    })
+    http.request(remote_endpoint, ["Content-Type: application/json"], HTTPClient.METHOD_POST, payload)
+    # Limpiar nodo al terminar
+    await http.request_completed
+    http.queue_free()
+```
+
+**Checklist para Sentry:**
+- [ ] Crear cuenta en [sentry.io](https://sentry.io) (plan free disponible)
+- [ ] Crear proyecto tipo "Other" (Godot no tiene SDK nativo oficial)
+- [ ] Copiar el DSN del proyecto y guardarlo en variable de entorno (no en el código)
+- [ ] Configurar `remote_endpoint` en el Inspector del nodo Logging
+- [ ] Activar `enable_remote_upload = true` en builds de release únicamente
+- [ ] Filtrar eventos: sólo enviar `level == "error"` para no saturar la cuota gratuita
+- [ ] Verificar que **ningún dato de usuario (PII)** se incluye en `data` (ver nota de privacidad)
+
+### Opción B.2 — GameAnalytics (para métricas de gameplay)
+
+**Propósito:** Análisis de comportamiento de jugadores: sesiones, eventos de progresión, retención, funnel de rondas.
+
+**Integración:** GameAnalytics ofrece un SDK para Unity pero no para Godot oficialmente. Alternativas:
+1. **HTTP REST API directa** — enviar eventos POST al endpoint de GameAnalytics desde `_upload_batch()`.
+2. **Colector propio** — servidor simple (Node.js / Python FastAPI) que recibe los JSON-lines y los reenvía a GameAnalytics o los almacena en una base de datos propia.
+
+**Checklist para GameAnalytics:**
+- [ ] Crear cuenta en [gameanalytics.com](https://gameanalytics.com) (plan free: hasta 100k MAU)
+- [ ] Obtener `game_key` y `secret_key` del proyecto
+- [ ] Implementar autenticación HMAC-SHA256 requerida por la API
+- [ ] Mapear eventos del juego a los tipos de GA: `progression`, `design`, `resource`, `error`
+- [ ] Decidir batching: enviar cada N minutos o al cerrar la sesión
+- [ ] Añadir consentimiento del usuario si el juego se distribuye en la UE (GDPR)
+
+### Opción B.3 — Colector propio mínimo (recomendada para indie)
+
+Para un equipo pequeño, una opción más económica y con control total de los datos:
+
+```
+[Godot] --HTTP POST JSON-lines--> [servidor simple] --INSERT--> [PostgreSQL / SQLite]
+                                         |
+                                  [Metabase / Grafana]  ← dashboards
+```
+
+**Stack sugerido:**
+- Backend: **FastAPI** (Python) + **SQLite** (MVP) o **PostgreSQL** (producción)
+- Dashboard: **Metabase** (gratis, self-hosted) para consultas SQL sin código
+- Hosting: **Railway.app** o **Render.com** (gratis en tier básico)
+
+**Costo estimado:** $0–$7/mes para un juego indie con <10k jugadores activos.
+
+### Nota de privacidad
+
+> **IMPORTANTE:** Antes de activar cualquier telemetría remota, se debe:
+> 1. Añadir una pantalla de **consentimiento** en el primer arranque del juego.
+> 2. Garantizar que **ningún PII** (nombre, email, IP, hardware ID) se incluye en los eventos.
+> 3. Documentar la política de privacidad y retención de datos.
+> 4. Si el juego se vende en la UE: cumplir con **GDPR** (derecho al olvido, minimización de datos).
+>
+> El campo `data` de los eventos de `Logging` debe contener **sólo datos de gameplay** (números de ronda, posiciones de juego, tipos de enemigos). **Nunca incluir** usernames, IPs, device IDs o cualquier dato que permita identificar a una persona.
+
+### Resumen de opciones
+
+| Opción | Errores | Gameplay | Costo | Privacidad | Recomendado para |
+|---|---|---|---|---|---|
+| Local (actual) | ❌ No visible | ❌ No visible | $0 | ✅ Total control | Desarrollo / QA |
+| Sentry | ✅ Excelente | ❌ No aplica | $0–$26/mes | ⚠️ Requiere DSN seguro | Pre-launch crashes |
+| GameAnalytics | ❌ Básico | ✅ Excelente | $0 (free tier) | ⚠️ GDPR si EU | Launch / retención |
+| Colector propio | ✅ Custom | ✅ Total control | $0–$7/mes | ✅ Total control | Indie con recursos |
+
+---
+
+### 4.1 Autoloads implementados — Skeletons (2026-03-29)
 
 > **Estado:** Skeletons creados y registrados en `project.godot`. Lógica completa pendiente de implementación (marcada con `TODO`).
 > **Ruta de scripts:** `papa-gallo/scripts/autoload/`
@@ -232,6 +379,7 @@ func start_new_round() -> void:
 
 | Autoload | Archivo | Responsabilidad | Señales expuestas |
 |---|---|---|---|
+| `Logging` | `scripts/autoload/Logging.gd` | Escribe eventos JSON-lines en `logs/session_<id>.log`, buffer/flush/rotation | — |
 | `GameManager` | `scripts/autoload/GameManager.gd` | Coordina rondas, puntuación y ciclo de vida de la partida | `round_started(round)`, `round_ended(round)`, `score_changed(new_score)` |
 | `InputManager` | `scripts/autoload/InputManager.gd` | Abstrae Input Map, wrappers de consulta y rebinding con persistencia | `input_rebound(action)` |
 | `AudioManager` | `scripts/autoload/AudioManager.gd` | Reproduce música y SFX, controla volumen por bus (`"Music"` y `"SFX"`) | — |

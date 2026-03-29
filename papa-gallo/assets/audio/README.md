@@ -117,10 +117,10 @@ Para optimizar rendimiento en rondas con muchos enemigos simultáneos:
 ```
 DAW (FL Studio / Reaper)
   └── Exportar WAV 48kHz 24-bit
-        └── audio/ (raíz del repo — archivos maestros)
-              └── Procesar / Convertir
-                    └── papa-gallo/assets/audio/processed/  (exports intermedios)
-                          └── papa-gallo/assets/audio/music/ o sfx/  (listos para Godot)
+		└── audio/ (raíz del repo — archivos maestros)
+			  └── Procesar / Convertir
+					└── papa-gallo/assets/audio/processed/  (exports intermedios)
+						  └── papa-gallo/assets/audio/music/ o sfx/  (listos para Godot)
 ```
 
 ---

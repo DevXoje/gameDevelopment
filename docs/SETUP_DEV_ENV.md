@@ -375,7 +375,88 @@ Si el smoke test **falla**, verificar:
 
 ---
 
-## 11. Troubleshooting
+## 11. Sistema de Oleadas — RoundManager + Spawner + Enemy
+
+> Disponible desde el vertical slice de enemigos (2026-03-29). Requiere Godot 4.6.
+
+### 11.1 Archivos del sistema de oleadas
+
+| Artefacto | Ruta |
+|---|---|
+| Script del enemigo | `papa-gallo/scripts/enemy.gd` |
+| Escena del enemigo | `papa-gallo/scenes/enemies/Enemy.tscn` |
+| Script del Spawner | `papa-gallo/scripts/spawner.gd` |
+| Escena del Spawner | `papa-gallo/scenes/Spawner.tscn` |
+| Script del RoundManager | `papa-gallo/scripts/round_manager.gd` |
+| Smoke test de enemigos | `papa-gallo/tools/smoke_test_enemy.gd` |
+
+### 11.2 Cómo iniciar una ronda en el editor
+
+1. Abre `scenes/Main.tscn` en Godot.
+2. Presiona **F5** (Play Project).
+3. Presiona **F5 in-game** (`debug_next_wave` input action) para iniciar la primera ronda.
+   - Se spawneará 3 enemigos (base_count) alrededor del jugador.
+   - Cada F5 adicional incrementa la ronda: ronda 2 → 4 enemigos, ronda 3 → 5, etc.
+4. Los enemigos (cuadrados rojos 32×32) perseguirán al jugador automáticamente.
+
+> **Nota:** El input action `debug_next_wave` está mapeado a la tecla **F5** (keycode 4194330).
+> Solo disponible en builds de debug — a futuro se puede deshabilitar con `OS.is_debug_build()`.
+
+### 11.3 Smoke test automatizado de enemigos (headless)
+
+```bash
+# Desde la raíz del repositorio (gameDevelopment/)
+godot --headless --path papa-gallo --script tools/smoke_test_enemy.gd
+```
+
+**Resultado esperado:**
+```
+[SmokeTest] ====== SMOKE TEST ENEMY — PapaGallo ======
+[SmokeTest] --- Check 1: Existencia de scripts ---
+[SmokeTest]   [OK] enemy.gd
+[SmokeTest]   [OK] spawner.gd
+[SmokeTest]   [OK] round_manager.gd
+[SmokeTest]   [OK] Enemy.tscn existe
+[SmokeTest] --- Check 2: Propiedades exportadas de Enemy ---
+[SmokeTest]   [OK] Propiedad 'speed' encontrada
+[SmokeTest]   [OK] Propiedad 'aggro_range' encontrada
+[SmokeTest]   [OK] Propiedad 'stop_distance' encontrada
+[SmokeTest] --- Check 3: spawn_wave(2) instancia 2 enemigos ---
+[SmokeTest]   [OK] 2 enemigos spawneados correctamente
+[SmokeTest] --- Check 4: Enemigo persigue al jugador ---
+[SmokeTest]   [OK] Enemigo persigue al jugador correctamente
+[SmokeTest] ✅ SMOKE TEST PASSED — N checks OK
+```
+
+El log se guarda automáticamente en `papa-gallo/logs/smoke_test_enemy_<timestamp>.log`.
+
+Si el smoke test **falla**, verificar:
+- Que `scenes/enemies/Enemy.tscn` existe y tiene el script `scripts/enemy.gd` asignado.
+- Que el nodo `Player` en `Main.tscn` está en el grupo **"player"** (el enemigo busca por este grupo).
+- Que `scripts/spawner.gd` tiene el campo `enemy_scene` asignado (ver Inspector de `Spawner` en `Main.tscn`).
+- Que `scripts/round_manager.gd` tiene `spawner_path` apuntando a `../Spawner`.
+
+### 11.4 Añadir al jugador el grupo "player" (requerido por enemy.gd)
+
+El script `enemy.gd` busca al jugador usando `get_tree().get_nodes_in_group("player")`.
+
+Para que el jugador sea detectado:
+1. Abre `scenes/Player.tscn` en Godot.
+2. Selecciona el nodo raíz `Player`.
+3. En el panel **Node** (derecha) → pestaña **Groups** → escribe `player` → click **Add**.
+4. Guarda la escena.
+
+**Alternativa por código** (ya incluido en versiones futuras del player.gd):
+```gdscript
+func _ready() -> void:
+    add_to_group("player")
+```
+
+> **Nota:** Sin este paso, los enemigos no detectarán al jugador y no se moverán.
+
+---
+
+## 12. Troubleshooting
 
 ### El proyecto no abre / muestra errores
 
@@ -425,4 +506,143 @@ Los archivos `.import` son generados. Si hay conflictos:
 
 ---
 
-_Documento creado el 2026-03-29. Actualizar cada vez que cambie el setup del proyecto._
+## 13. Observabilidad y Logs
+
+> Disponible desde el vertical slice de Logging (2026-03-29). Requiere Godot 4.6.
+
+El Autoload `Logging` proporciona observabilidad local robusta: escribe eventos estructurados en formato **JSON-lines** para que puedan ser procesados con cualquier herramienta de análisis de texto (`jq`, Python, Excel, etc.).
+
+### 13.1 Cómo se escriben los logs
+
+- Cada sesión de juego genera un archivo independiente en `papa-gallo/logs/session_<session_id>.log`.
+- El `session_id` tiene el formato `YYYYMMDD_HHMMSS_RRRR` (timestamp UTC + 4 dígitos aleatorios).
+- Cada línea del archivo es un objeto JSON independiente (formato **JSON-lines / ndjson**).
+- El buffer se escribe a disco automáticamente cada **20 eventos** o cada **10 segundos** (configurable).
+- Al cerrar el juego (`NOTIFICATION_WM_CLOSE_REQUEST`) se hace un flush final.
+
+### 13.2 Ruta de los logs
+
+```
+papa-gallo/
+└── logs/
+    ├── session_20260329_101500_4231.log   ← sesión de juego normal
+    ├── session_20260329_112045_0017.log   ← sesión de smoke test
+    └── smoke_test_enemy_2026-03-29T10-08-13.log  ← log de texto plano (legacy)
+```
+
+> **Nota:** Los archivos `logs/` están listados en `.gitignore` (no se suben al repo).
+> La retención local es: máximo **10 archivos** de log y **2 MB** por archivo antes de rotar.
+
+### 13.3 Cómo leer los logs
+
+Cada línea es un JSON con este esquema:
+
+```json
+{"ts":"2026-03-29T10:15:00Z","session_id":"20260329_101500_4231","version":"0.1.0","platform":"macOS","level":"info","event":"round_started","data":{"round":1,"spawn_count":3}}
+```
+
+**Con `jq` (recomendado):**
+
+```bash
+# Ver todos los eventos de una sesión
+jq . papa-gallo/logs/session_*.log | less
+
+# Filtrar sólo eventos de inicio de ronda
+jq 'select(.event == "round_started")' papa-gallo/logs/session_*.log
+
+# Ver todos los enemigos spawneados
+jq 'select(.event == "enemy_spawned") | .data' papa-gallo/logs/session_*.log
+
+# Historial de muertes del jugador
+jq 'select(.event == "player_death") | {ts, data}' papa-gallo/logs/session_*.log
+
+# Ver resultados de smoke tests
+jq 'select(.event | startswith("smoke_test"))' papa-gallo/logs/session_*.log
+```
+
+**Sin `jq` (Python):**
+
+```python
+import json, pathlib
+
+for line in pathlib.Path("papa-gallo/logs").glob("session_*.log"):
+    for raw in line.read_text().splitlines():
+        evt = json.loads(raw)
+        print(evt["ts"], evt["event"], evt.get("data", {}))
+```
+
+### 13.4 Eventos instrumentados
+
+| Evento | Script origen | Datos incluidos |
+|---|---|---|
+| `session_started` | `Logging._ready()` | session_id, platform, version, debug |
+| `session_ended` | `Logging._notification()` | session_id, duration_s |
+| `round_started` | `round_manager.gd` | round, spawn_count |
+| `round_ended` | `round_manager.gd` | round, duration_s, enemies_remaining |
+| `enemy_spawned` | `enemy.gd` | enemy_type, pos |
+| `enemy_died` | `enemy.gd` | enemy_type, pos, killer |
+| `player_started` | `player.gd` | session_id, position |
+| `player_death` | `player.gd` | position |
+| `smoke_test_passed` | `smoke_test_*.gd` | suite, pass_count, fail_count |
+| `smoke_test_failed` | `smoke_test_*.gd` | suite, pass_count, fail_count, failures |
+
+### 13.5 Política de retención
+
+| Parámetro | Valor por defecto | Variable en Logging.gd |
+|---|---|---|
+| Eventos por flush | 20 | `auto_flush_count` |
+| Intervalo de flush | 10 s | `auto_flush_interval` |
+| Tamaño máximo de archivo | 2 MB | `max_file_size_bytes` |
+| Archivos máximos en `logs/` | 10 | `max_log_files` |
+
+Los parámetros son `@export var` — se pueden cambiar desde el Inspector si el nodo Logging se instancia en una escena, o modificando los defaults en el script.
+
+### 13.6 Verificación manual (Godot)
+
+#### GUI (editor de Godot)
+
+1. Abre el proyecto en Godot 4.6: `godot -e --path papa-gallo`
+2. Verifica que `Logging` aparece en **Project > Project Settings > Autoload** con la ruta `res://scripts/autoload/Logging.gd`.
+3. Ejecuta el juego con **F5**.
+4. Inicia una ronda presionando **F5 in-game** (acción `debug_next_wave`).
+5. Cierra el juego.
+6. Abre la carpeta `papa-gallo/logs/` — debe existir un archivo `session_<id>.log`.
+7. Abre el archivo y verifica que hay líneas JSON con los eventos:
+   - `session_started`
+   - `round_started` con `"round":1` y `"spawn_count":3`
+   - `enemy_spawned` (una por cada enemigo spawnado)
+   - `session_ended`
+
+**Ejemplo de línea esperada:**
+```json
+{"ts":"2026-03-29T10:15:01Z","session_id":"20260329_101501_1234","version":"0.1.0","platform":"macOS","level":"info","event":"round_started","data":{"round":1,"spawn_count":3}}
+```
+
+#### CLI (headless, sin GUI)
+
+```bash
+# Desde la raíz del repositorio (gameDevelopment/)
+godot --headless --path papa-gallo --script tools/smoke_test_player.gd
+godot --headless --path papa-gallo --script tools/smoke_test_enemy.gd
+
+# Verificar que se crearon archivos de log JSON-lines
+ls papa-gallo/logs/session_*.log
+
+# Verificar eventos de smoke test
+jq 'select(.event | startswith("smoke_test"))' papa-gallo/logs/session_*.log
+```
+
+**Resultado esperado en `logs/session_*.log` tras smoke test:**
+```json
+{"ts":"...","session_id":"...","level":"info","event":"session_started","data":{"test_suite":"smoke_test_enemy",...}}
+{"ts":"...","session_id":"...","level":"info","event":"smoke_test_passed","data":{"suite":"enemy","pass_count":7,"fail_count":0,"failures":[]}}
+```
+
+Si el archivo de log NO se crea, verificar:
+- Que el directorio `papa-gallo/logs/` existe (se crea automáticamente, pero requiere permisos de escritura).
+- Que el script `scripts/autoload/Logging.gd` carga sin errores (revisar la consola de Godot).
+- En modo headless, que el smoke test llama a `_init_logging()` (ver código de `tools/smoke_test_*.gd`).
+
+---
+
+_Documento actualizado el 2026-03-29._

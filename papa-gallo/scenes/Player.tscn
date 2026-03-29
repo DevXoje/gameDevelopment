@@ -10,6 +10,7 @@ size = Vector2(32, 32)
 
 [node name="Player" type="CharacterBody2D"]
 script = ExtResource("1_player_script")
+groups = ["player"]
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = SubResource("2_placeholder_tex")

@@ -1,0 +1,106 @@
+--- a/papa-gallo/tools/smoke_test_player.gd
++++ b/papa-gallo/tools/smoke_test_player.gd
+@@ -17,7 +17,7 @@
+ ## Nota sobre Logging en modo headless:
+ ##   El Autoload Logging NO está disponible en scripts headless que extienden SceneTree.
+-##   Este script instancia Logging manualmente y llama a start_session() + log() + flush()
++##   Este script instancia Logging manualmente y llama a start_session() + write_event() + flush()
+ ##   para garantizar que los eventos de smoke test se persistan en disco.
+ 
+--- a/papa-gallo/tools/smoke_test_enemy.gd
++++ b/papa-gallo/tools/smoke_test_enemy.gd
+@@ -366,7 +366,7 @@
+ func _log_smoke_result(passed: bool, suite: String, pass_count: int, fail_count: int) -> void:
+ 	if _logging == null:
+ 		return
+ 	var event := "smoke_test_passed" if passed else "smoke_test_failed"
+-	# CHANGED_FOR_LOGGING: convertido de log(level, event, dict) → write_event({dict}) — evita conflicto con builtin GDScript log(float)
++	# Nota: escribe el resultado con write_event() — evita conflicto con builtin GDScript log(float)
+ 	_logging.write_event({
+ 		"level": "info" if passed else "error",
+ 		"event": event,
+--- a/papa-gallo/scripts/round_manager.gd
++++ b/papa-gallo/scripts/round_manager.gd
+@@ -108,14 +108,12 @@
+ 	var enemy_count: int = _calculate_enemy_count()
+ 	print("[RoundManager] ▶ Iniciando ronda %d con %d enemigos." % [current_round, enemy_count])
+ 
+ 	# Registrar evento de inicio de ronda.
+-	if has_node("/root/Logging"):
+-		# CHANGED: safe logging accessor
+-		var logger := _get_logger()
+-		if logger:
+-			logger.write_event({
+-				"level": "info",
+-				"event": "round_started",
+-				"data": {
+-					"round": current_round,
+-					"spawn_count": enemy_count,
+-				},
+-			})
++	var logger_start := _get_logger()
++	if logger_start:
++		logger_start.write_event({
++			"level": "info",
++			"event": "round_started",
++			"data": {
++				"round": current_round,
++				"spawn_count": enemy_count,
++			},
++		})
+ 
+ 	# Sincronizar con GameManager si está disponible.
+@@ -145,15 +143,13 @@
+ 	var duration: float = Time.get_unix_time_from_system() - _round_start_time
+ 	is_round_active = false
+ 	print("[RoundManager] ⏸ Ronda %d detenida." % current_round)
+ 
+ 	# Registrar evento de fin de ronda.
+-	if has_node("/root/Logging"):
+-		# CHANGED: safe logging accessor
+-		var logger := _get_logger()
+-		if logger:
+-			logger.write_event({
+-				"level": "info",
+-				"event": "round_ended",
+-				"data": {
+-					"round": current_round,
+-					"duration_s": snappedf(duration, 0.01),
+-					"enemies_remaining": _spawner.get_active_count() if (_spawner != null and _spawner.has_method("get_active_count")) else -1,
+-				},
+-			})
++	var logger_stop := _get_logger()
++	if logger_stop:
++		logger_stop.write_event({
++			"level": "info",
++			"event": "round_ended",
++			"data": {
++				"round": current_round,
++				"duration_s": snappedf(duration, 0.01),
++				"enemies_remaining": _spawner.get_active_count() if (_spawner != null and _spawner.has_method("get_active_count")) else -1,
++			},
++		})
+ 
+ 	round_stopped.emit(current_round)
+--- a/papa-gallo/scripts/enemy.gd
++++ b/papa-gallo/scripts/enemy.gd
+@@ -53,7 +53,7 @@
+ # CHANGED: safe logging accessor — referencia cacheada al Autoload Logging (null si no disponible).
+-var _logger = null
++var _logger: Node = null
+ 
+--- a/papa-gallo/scripts/player.gd
++++ b/papa-gallo/scripts/player.gd
+@@ -41,7 +41,7 @@
+ # CHANGED: safe logging accessor — referencia cacheada al Autoload Logging (null si no disponible).
+-var _logger = null
++var _logger: Node = null
+ 
+--- a/papa-gallo/scripts/round_manager.gd
++++ b/papa-gallo/scripts/round_manager.gd
+@@ -68,7 +68,7 @@
+ var _spawner: Node = null
+ var _round_start_time: float = 0.0
+ # CHANGED: safe logging accessor — referencia cacheada al Autoload Logging (null si no disponible).
+-var _logger = null
++var _logger: Node = null

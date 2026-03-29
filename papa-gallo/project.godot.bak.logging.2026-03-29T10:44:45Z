@@ -31,7 +31,6 @@ renderer/rendering_method.mobile="gl_compatibility"
 
 [autoload]
 
-Logging="*res://scripts/autoload/Logging.gd"
 GameManager="*res://scripts/autoload/GameManager.gd"
 InputManager="*res://scripts/autoload/InputManager.gd"
 AudioManager="*res://scripts/autoload/AudioManager.gd"
