@@ -1,0 +1,75 @@
+ASUNTO: [ACCIÓN REQUERIDA] Validación GDD — Reunión 45 min | [FECHA A DEFINIR]
+
+---
+
+Hola equipo,
+
+Os convoco a una reunión de validación del Game Design Document (GDD) del proyecto.
+El objetivo es revisar la versión actual (v0.2), confirmar las decisiones clave y cerrar los TODOs prioritarios antes de comenzar la implementación.
+
+────────────────────────────────────────────
+DETALLES DE LA REUNIÓN
+────────────────────────────────────────────
+Fecha:     [Por definir — propuesta: esta semana]
+Duración:  45 minutos
+Formato:   Presencial / Videollamada [elegir]
+Link:      [Añadir link de Meet/Zoom/Discord]
+
+────────────────────────────────────────────
+OBJETIVO
+────────────────────────────────────────────
+Validar el GDD v0.2 y dejarlo listo como documento de referencia para
+iniciar el desarrollo. Al terminar la reunión, el GDD debe estar marcado
+como "Aprobado para Implementar" o tener una lista clara de cambios
+pendientes con responsables y fechas.
+
+────────────────────────────────────────────
+PRE-LECTURA OBLIGATORIA (antes de la reunión)
+────────────────────────────────────────────
+Por favor, lee estos documentos ANTES de la reunión (~20-22 min en total):
+
+1. docs/GDD.md                    — GDD actualizado (v0.2) [~15 min]
+2. docs/GDD_CHANGE_SUMMARY.md     — Qué cambió vs. versión anterior [~5 min]
+3. docs/GDD_ACCEPTANCE_CHECKLIST.md — Criterios de aprobación [~2 min]
+
+La reunión será más ágil si todos llegan habiendo leído el material.
+
+────────────────────────────────────────────
+DECISIONES CRÍTICAS QUE RESOLVEREMOS
+────────────────────────────────────────────
+Entre otras, el equipo decidirá:
+- Nombre definitivo del juego y del equipo
+- Aprobación del esquema de controles (teclado y mando)
+- Confirmación del estilo visual (Pixel-art + paleta de colores)
+- Modelo de monetización (Premium pago único)
+- Estado general del GDD: aprobado / requiere revisión
+
+────────────────────────────────────────────
+ROLES EN LA REUNIÓN
+────────────────────────────────────────────
+Moderador:  [A designar]
+Scribe:     [A designar]
+Diseño:     [A designar]
+Arte:       [A designar]
+Tech Lead:  [A designar]
+
+────────────────────────────────────────────
+ADJUNTOS SUGERIDOS
+────────────────────────────────────────────
+- docs/GDD.md (versión actual)
+- docs/GDD_CHANGE_SUMMARY.md
+- docs/GDD_ACCEPTANCE_CHECKLIST.md
+- docs/MEETING_GDD_VALIDATION.md (agenda completa con tiempos)
+
+Si tenéis dudas o comentarios previos, respondad a este correo o dejadlos
+en el canal del equipo antes de la reunión.
+
+¡Nos vemos pronto!
+
+[Nombre del convocante]
+[Fecha de envío]
+
+────────────────────────────────────────────
+Nota: Este documento es parte del proceso de desarrollo del proyecto.
+Todos los acuerdos tomados en la reunión serán registrados y actualizados
+en el GDD como versión v0.3.

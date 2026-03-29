@@ -1,20 +1,12 @@
 # 🎮 Game Design Document (GDD)
 
-> **Actualizado tras validación de equipo (reunión 2026-03-28) — aprobado para implementar**
->
-> **Decisiones aprobadas en reunión 2026-03-28:**
-> - Nombre del juego: **PapaGallo**
-> - Equipo: **Amader, Xoje, El Negro**
-> - Controles de teclado (J/K/Tab/Shift/E) y mando (RB/RT/Y/B/A): aprobados sin cambios
-> - Modelo de monetización: **Premium (pago único)** — confirmado
-> - Estilo visual y paleta de colores: aprobados; paleta mapeada a categorías de elementos (ver §14.4)
-> - Estado del GDD: **Aprobado para implementar**
+> **Actualizado desde docs/NOSOTROS.md — revisar y validar (fecha: 2026-03-28, autor: integración automática desde NOSOTROS.md)**
 
-**Título del Juego:** PapaGallo  
-**Autor/es:** Amader, Xoje, El Negro  
-**Versión:** 0.3 — Validación de equipo y aprobación para implementar  
-**Fecha:** 2026-03-28T18:14:34Z  
-**Estado:** Aprobado para implementar  
+**Título del Juego:** TODO: NOMBRE DEL JUEGO  
+**Autor/es:** TODO: NOMBRE DEL EQUIPO  
+**Versión:** 0.2 — Integración de contenido desde NOSOTROS.md  
+**Fecha:** 2026-03-28  
+**Estado:** En elaboración  
 
 ---
 
@@ -43,7 +35,7 @@ Juego de supervivencia por rondas con vista top-down 2D y combate cuerpo a cuerp
 ## 4. Público Objetivo
 
 - **Perfil:** Jugadores que disfrutan de superarse cada partida y llegar más lejos al conocer cada vez mejor las mecánicas del juego.
-- **Edad:** TODO: rango de edad (ej. 16-50años)
+- **Edad:** TODO: rango de edad (ej. 16-35 años)
 - **Géneros de referencia:** Survival horde, roguelite, acción top-down
 - **Juegos de referencia (competencia/inspiración):** Call of Duty Zombies (Black Ops 1), Enter the Gungeon, Nuclear Throne
 
@@ -129,7 +121,7 @@ El jugador pierde cuando recibe el cuarto golpe (agota sus 3 puntos de vida). Se
 
 ### 8.1 Estructura de Progresión
 
-Progresión dentro de la partida: el jugador acumula puntos, desbloquea zonas y mejora su arsenal. No hay progresión persistente entre partidas en el MVP (cada partida empieza desde cero). 
+Progresión dentro de la partida: el jugador acumula puntos, desbloquea zonas y mejora su arsenal. No hay progresión persistente entre partidas en el MVP (cada partida empieza desde cero). TODO: evaluar si añadir desbloqueables persistentes en la versión completa.
 
 ### 8.2 Curva de Dificultad
 
@@ -153,6 +145,7 @@ Dificultad
 - **Puntos:** Moneda de progresión dentro de la partida.
 - **Desbloqueo de zonas:** Amplía el mapa disponible.
 - **Armas mejores:** Aumentan las opciones tácticas del jugador.
+- TODO: Tabla de puntuaciones (leaderboard) en versión completa.
 
 ---
 
@@ -164,7 +157,7 @@ Los puntos son la única moneda del juego. Se obtienen exclusivamente eliminando
 |---|---|---|---|
 | Puntos | Eliminar enemigos | Desbloquear zonas / Comprar armas | Sin límite (acumulables) |
 
-**Modelo de monetización:** Premium (pago único) — aprobado en reunión 2026-03-28.
+**Modelo de monetización:** Premium (pago único). TODO: confirmar modelo con el equipo.
 
 ---
 
@@ -172,28 +165,26 @@ Los puntos son la única moneda del juego. Se obtienen exclusivamente eliminando
 
 ### 10.1 Esquema de Controles
 
-> **Estado:** Aprobado en reunión 2026-03-28 — sin cambios.
-
 #### Teclado
 | Acción | Tecla |
 |---|---|
 | Moverse | WASD |
-| Ataque principal | J | 
-| Ataque secundario | K | 
-| Cambiar de arma | Tab | 
-| Esprintar | Shift | 
-| Interactuar (zonas de compra) | E | 
+| Ataque principal | TODO: botón por definir (ej. clic izquierdo / J) |
+| Ataque secundario | TODO: botón por definir (ej. clic derecho / K) |
+| Cambiar de arma | TODO: botón por definir (ej. Q / rueda del ratón) |
+| Esprintar | TODO: botón por definir (ej. Shift) |
+| Interactuar (zonas de compra) | TODO: botón por definir (ej. E / F) |
 | Menú pausa | Escape |
 
 #### Mando (Gamepad) — Compatibilidad completa
 | Acción | Botón |
 |---|---|
 | Moverse | Stick izquierdo |
-| Ataque principal | RB | 
-| Ataque secundario | RT |
-| Cambiar de arma | Y |
-| Esprintar | B |
-| Interactuar | A |
+| Ataque principal | TODO: botón por definir |
+| Ataque secundario | TODO: botón por definir |
+| Cambiar de arma | TODO: botón por definir |
+| Esprintar | TODO: botón por definir |
+| Interactuar | TODO: botón por definir |
 
 ### 10.2 HUD (Heads-Up Display)
 
@@ -202,16 +193,14 @@ Los siguientes elementos se muestran en pantalla durante el juego:
 - **Vida del jugador:** Indicador de los puntos de vida actuales (máx. 3).
 - **Arma equipada:** Nombre o icono del arma actualmente en uso.
 - **Ronda actual:** Número de ronda en curso.
-- **Indicador de puntos acumulados**.
-- **Barra de estamina**.
+- TODO: Indicador de puntos acumulados (a confirmar si va en HUD o en zonas de compra).
+- TODO: Barra de estamina.
 
 ---
 
 ## 11. UI/UX — Flujo de Pantallas
 
 TODO: Describir el flujo de navegación de menús/pantallas. Puedes usar un diagrama de texto.
-
-Descripción: Menú con botones jugar y salir. Jugar inicia la partida. El menu escape en partida solo tiene la opción de salir, y pausa la partida mientras está activo.
 
 ```
 [Inicio/Splash] → [Menú Principal]
@@ -226,6 +215,9 @@ Descripción: Menú con botones jugar y salir. Jugar inicia la partida. El menu 
           [Game Over — Pantalla de resultados: ronda alcanzada + puntos]
 ```
 
+**Principios UX:**
+- TODO: Principio 1 (ej. "Máximo 3 clics para empezar a jugar")
+- TODO: Principio 2 (ej. "Feedback visual y sonoro en cada interacción")
 
 ---
 
@@ -233,7 +225,7 @@ Descripción: Menú con botones jugar y salir. Jugar inicia la partida. El menu 
 
 El juego es arcade puro sin narrativa explícita en el MVP. Si se incorpora contexto narrativo (ambientación medieval, razón de los ataques, etc.) se documentará aquí en versiones futuras.
 
-
+- TODO: Definir si se añade ambientación narrativa mínima (ej. un párrafo de lore en el menú).
 
 ---
 
@@ -241,14 +233,14 @@ El juego es arcade puro sin narrativa explícita en el MVP. Si se incorpora cont
 
 > El juego tiene un único mapa en el MVP con zonas desbloqueables. Usa esta plantilla para documentar cada zona/mapa adicional.
 
-### Mapa 1 (MVP): El castillo 
+### Mapa 1 (MVP): TODO: NOMBRE DEL MAPA
 
 - **Número de zonas desbloqueables:** 2 o 3
-- **Bioma/Tema visual:** 
+- **Bioma/Tema visual:** TODO (ej. fortaleza medieval, aldea, mazmorra)
 - **Puntos de entrada de enemigos:** Fijos por zona; se añaden al desbloquear nuevas zonas
 - **Zonas de compra/interacción:** Puntos donde gastar puntos para armas o desbloquear zonas
 - **Mecánicas introducidas:** Loop principal completo
-- **Notas de diseño:**: Algunos terrenos hacen que ciertos tipos de arma sean más eficaces. POr ejemplo, hierba alta que no deja pasar flechas, pasillo estrecho que pone a los enemigos en fila para ser atravesados. 
+- **Notas de diseño:** TODO
 
 ---
 
@@ -256,36 +248,20 @@ El juego es arcade puro sin narrativa explícita en el MVP. Si se incorpora cont
 
 ### 14.1 Estilo Visual
 
-2D top-down. Pixel-art 
+2D top-down. TODO: definir estilo gráfico específico (ej. pixel art, vector, etc.).
 
-> **Estado:** Aprobado en reunión 2026-03-28.
-
-**Paleta de colores principal:** A0DDD3,6FB0B7,577F9D,4A5786,3E3B66,2D1E2F,452E3F,5D4550,7B6268,9C807E,C3A79C,DBC9B4,FCECD1,AAD795,64B082,488885,3F5B74,EBC8A7,D3A084,B87E6C,8F5252,6A3948,C57F79,AB597D,7C3D64,4E2B45,7A3B4F,A94B54,D8725E,F09F71,F7CF91 
+**Paleta de colores principal:** TODO (puedes pegar códigos hex o describir la paleta)
 
 ### 14.2 Referencias Visuales
 
 | Referencia | Por qué la usamos |
 |---|---|
 | Call of Duty Zombies (Black Ops 1) | Referencia de gameplay y atmósfera de tensión creciente |
+| TODO: Juego/Arte adicional | TODO: aspecto específico |
 
 ### 14.3 Personajes — Guía Visual
 
-El personaje es un guerrero al que se le ve claramente que ha tenido días mejores, un ser cambiado por la guerra. Ahora sus amigos son zombies y los tiene que matar, pero es tan duro que lo puede hacer.
-
-### 14.4 Mapeo de Paleta a Categorías de Elementos
-
-> Aprobado en reunión 2026-03-28: colores existentes de la paleta mapeados a categorías funcionales de elementos visuales.
-
-| Categoría | Color(es) Asignado(s) | Hex | Justificación |
-|---|---|---|---|
-| Fondo / Terreno | Azul oscuro, gris oscuro | `3E3B66`, `2D1E2F` | Tonos fríos y oscuros para el suelo/noche medieval |
-| Terreno secundario / Muro | Gris medio, gris cálido | `7B6268`, `9C807E` | Piedra y muros del castillo |
-| Personaje (jugador) | Beige cálido, naranja claro | `FCECD1`, `EBC8A7` | Piel del guerrero; tonos cálidos que destacan sobre el fondo |
-| Enemigos | Rojo apagado, rojo oscuro | `8F5252`, `6A3948` | Tonos de amenaza sin saturación excesiva |
-| UI / HUD | Verde agua claro, cian | `A0DDD3`, `6FB0B7` | Contraste nítido sobre fondo oscuro; fácil lectura |
-| VFX — Daño | Rojo vivo, naranja | `D8725E`, `F09F71` | Impacto visual de golpes; cálidos y llamativos |
-| VFX — Curación | Verde brillante, verde medio | `AAD795`, `64B082` | Curación/regeneración de vida |
-| Acento / Detalles | Morado medio, rosa oscuro | `AB597D`, `7C3D64` | Detalles ornamentales, UI secundaria |
+TODO: Describir el look & feel del personaje jugable y los tipos de enemigos.
 
 ---
 
@@ -293,19 +269,20 @@ El personaje es un guerrero al que se le ve claramente que ha tenido días mejor
 
 ### 15.1 Mood / Atmósfera
 
-El jugador siente el poder del guerrero, pero a la vez, no es dificil deducir que en algun momento morira debido al limitado espacio y el numero creciente de enemigos
+TODO: ¿Cómo quieres que se sienta el jugador? (ej. tensión creciente, urgencia, supervivencia desesperada)
 
 ### 15.2 Referencias Sonoras
 
 | Referencia | Tipo | Por qué |
 |---|---|---|
-| Neon White | Música | TODO |
-| Sangrientos | Efectos SFX | TODO |
+| TODO: OST de juego X | Música | TODO |
+| TODO: Película Y | Efectos SFX | TODO |
 
 ### 15.3 Diseño de Sonido
 
-- **Música dinámica:** Sí, según la vida, y según la cantidad de enemigos. 
-- **SFX principales:** Simples, prototipescos 
+- **Música dinámica:** TODO: sí/no y descripción breve
+- **SFX principales:** TODO: sonidos de combate cuerpo a cuerpo, entrada de enemigos, compra/desbloqueo
+- **Voz en off / Diálogos:** TODO: sí/no (posiblemente no en MVP)
 
 ---
 
@@ -352,3 +329,19 @@ TODO: Define cómo medirás el éxito del juego. Aplica tanto en playtest como p
 - [ ] Playtest con al menos 3 personas externas completado
 
 ---
+
+## 19. Notas y Pendientes
+
+> Sección libre para apuntes rápidos del equipo. Mover los ítems decididos a su sección correspondiente.
+
+- TODO: Definir nombre del juego
+- TODO: Definir nombre del equipo / autores
+- TODO: Confirmar mapeo exacto de botones de mando y teclado
+- TODO: Definir si la stamina tiene barra visible en HUD o indicador diferente
+- TODO: Aclarar si los puntos acumulados entre compras se muestran en HUD permanente o sólo en zonas de compra
+- TODO: Definir estilo visual (pixel art, vector, etc.)
+- TODO: Definir si habrá progresión persistente entre partidas (desbloqueables permanentes) o cada partida empieza desde cero
+
+---
+
+_Documento actualizado con contenido base desde docs/NOSOTROS.md (2026-03-28). Versión: 0.2 — Revisar y validar con el equipo._
