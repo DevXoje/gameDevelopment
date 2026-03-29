@@ -317,7 +317,65 @@ Estas escenas NO son parte del juego final, son herramientas de desarrollo.
 
 ---
 
-## 10. Troubleshooting
+## 10. Cómo Probar el Prototipo de Movimiento
+
+> Disponible desde el vertical slice MVP (2026-03-29). Requiere Godot 4.6.
+
+### 10.1 Escena y script principales
+
+| Artefacto | Ruta |
+|---|---|
+| Escena principal (entry point) | `papa-gallo/scenes/Main.tscn` |
+| Escena del jugador | `papa-gallo/scenes/Player.tscn` |
+| Script de movimiento | `papa-gallo/scripts/player.gd` |
+| HUD placeholder | `papa-gallo/scenes/HUD.tscn` |
+
+### 10.2 Abrir y ejecutar desde el editor
+
+1. Abrir Godot 4.6 con el proyecto:
+   ```bash
+   godot -e --path papa-gallo
+   ```
+2. En el FileSystem dock, navegar a `scenes/` y abrir `Main.tscn`.
+3. Presionar **F5** (Play Project) — Godot usará `Main.tscn` como escena principal automáticamente.
+
+### 10.3 Verificación manual de movimiento
+
+Con el juego ejecutándose:
+
+| Acción | Tecla | Resultado esperado |
+|---|---|---|
+| Mover arriba | W / ↑ | El jugador sube en pantalla |
+| Mover abajo | S / ↓ | El jugador baja en pantalla |
+| Mover izquierda | A / ← | El jugador se mueve a la izquierda, sprite voltea |
+| Mover derecha | D / → | El jugador se mueve a la derecha |
+| Sprint | Shift (izq. o der.) | El jugador se mueve más rápido, sprite se pone más claro |
+| Gamepad | Stick izquierdo + B | Misma lógica con mando |
+
+### 10.4 Smoke test automatizado (headless)
+
+```bash
+# Desde la raíz del repositorio (gameDevelopment/)
+godot --headless --path papa-gallo --script tools/smoke_test_player.gd
+```
+
+**Resultado esperado:**
+```
+[SmokeTest] Iniciando smoke test de movimiento del jugador...
+[SmokeTest] Posición inicial del jugador: (640, 360)
+[SmokeTest] Posición final del jugador: (660.x, 340.x)
+[SmokeTest] Desplazamiento total: XX.XX px
+[SmokeTest] ✅ PASÓ — El jugador se movió correctamente.
+```
+
+Si el smoke test **falla**, verificar:
+- Que `scenes/Main.tscn` existe y tiene un nodo hijo llamado `Player`.
+- Que `scripts/player.gd` está asignado al nodo `Player` en `Player.tscn`.
+- Que el Input Map tiene las acciones `move_right` y `move_up` definidas.
+
+---
+
+## 11. Troubleshooting
 
 ### El proyecto no abre / muestra errores
 

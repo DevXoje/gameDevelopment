@@ -1,0 +1,27 @@
+[gd_scene load_steps=5 format=3 uid="uid://main_scene"]
+
+[ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="1_player"]
+[ext_resource type="PackedScene" path="res://scenes/HUD.tscn" id="2_hud"]
+
+[sub_resource type="RectangleShape2D" id="1_floor_shape"]
+size = Vector2(1280, 40)
+
+[sub_resource type="PlaceholderTexture2D" id="2_floor_tex"]
+size = Vector2(1280, 40)
+
+[node name="Main" type="Node2D"]
+
+[node name="Floor" type="StaticBody2D" parent="."]
+position = Vector2(640, 580)
+
+[node name="FloorSprite" type="Sprite2D" parent="Floor"]
+texture = SubResource("2_floor_tex")
+modulate = Color(0.2, 0.6, 0.2, 1)
+
+[node name="FloorCollision" type="CollisionShape2D" parent="Floor"]
+shape = SubResource("1_floor_shape")
+
+[node name="Player" parent="." instance=ExtResource("1_player")]
+position = Vector2(640, 360)
+
+[node name="HUD" parent="." instance=ExtResource("2_hud")]
