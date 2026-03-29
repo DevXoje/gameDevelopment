@@ -456,7 +456,99 @@ func _ready() -> void:
 
 ---
 
-## 12. Troubleshooting
+## 12. CI & Como Ejecutar Tests Localmente
+
+> El proyecto tiene un pipeline de CI en GitHub Actions que ejecuta los smoke tests automaticamente en cada push/PR a `main` o `develop`. Esta seccion explica como replicar lo que hace el CI en tu maquina local.
+
+### 12.1 Ejecutar todos los smoke tests
+
+```bash
+# Desde la raiz del repositorio (gameDevelopment/)
+./tools/run_all_tests.sh
+```
+
+El script descubre automaticamente todos los archivos `smoke_test_*.gd` en `papa-gallo/tools/` y los ejecuta secuencialmente en modo headless.
+
+**Requisitos:**
+- Godot 4.6 instalado y accesible como `godot` en el PATH
+- Si tu binario de Godot tiene otro nombre o ruta:
+  ```bash
+  GODOT_BIN=/ruta/a/tu/godot ./tools/run_all_tests.sh
+  ```
+
+**Resultado esperado:**
+```
+============================================
+ PapaGallo — Test Runner
+ 2026-03-29 12:00:00 UTC
+============================================
+
+--- [1] smoke_test_player ---
+  [SmokeTest] Iniciando smoke test de movimiento del jugador...
+  [SmokeTest] PASSED
+
+--- [2] smoke_test_enemy ---
+  [SmokeTest] ====== SMOKE TEST ENEMY — PapaGallo ======
+  [SmokeTest] PASSED
+
+============================================
+ RESUMEN
+============================================
+  Tests encontrados: 2
+  Tests pasados:     2
+============================================
+RESULTADO: ALL PASSED
+```
+
+### 12.2 Ejecutar un smoke test individual
+
+```bash
+# Smoke test de movimiento del jugador
+godot --headless --path papa-gallo --script tools/smoke_test_player.gd
+
+# Smoke test del sistema de enemigos
+godot --headless --path papa-gallo --script tools/smoke_test_enemy.gd
+```
+
+### 12.3 API canónica de Logging — `write_event()`
+
+> **Migración completada (2026-03-29).** No hay llamadas legacy `Logging.log()` en el codebase. El CI ya no tiene un step de lint para patrones obsoletos.
+
+La API correcta es:
+
+```gdscript
+Logging.write_event({"level": "info", "event": "round_started", "data": {"round": 1}})
+```
+
+Para confirmar que no hay regresiones localmente:
+```bash
+# Debe devolver 0 resultados
+rg "Logging\.log\s*\(" --type gd papa-gallo/ tools/
+```
+
+Ver `tools/logging_migration_report.md` para el historial de auditoría.
+
+### 12.4 Que hace el CI
+
+El pipeline de GitHub Actions (`.github/workflows/ci.yml`) ejecuta en `ubuntu-latest`:
+
+1. **Checkout** del repositorio
+2. **Download** de Godot 4.6 headless para Linux (con cache)
+3. **Import** del proyecto Godot (genera `.godot/imported/`)
+4. **Smoke tests** via `tools/run_all_tests.sh`
+5. **Upload** de logs (`papa-gallo/logs/**`) como artifacts (14 dias de retencion)
+
+Para mas detalles, ver `docs/CI_RUNBOOK.md`.
+
+### 12.5 Como agregar un nuevo test
+
+1. Crear `papa-gallo/tools/smoke_test_NOMBRE.gd` que extienda `SceneTree`
+2. Llamar `quit(0)` si pasa, `quit(1)` si falla
+3. El test sera descubierto automaticamente por `run_all_tests.sh` y el CI
+
+---
+
+## 13. Troubleshooting
 
 ### El proyecto no abre / muestra errores
 

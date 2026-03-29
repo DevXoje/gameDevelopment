@@ -1,0 +1,244 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 2553305..54ec6bd 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -3,7 +3,11 @@
+ #
+ # Triggers: push y PR a main/develop
+ # Runner: ubuntu-latest
+-# Steps: checkout, descargar Godot 4.6 headless, ejecutar smoke tests, lint legacy .log(, upload artifacts
++# Steps: checkout, descargar Godot 4.6 headless, ejecutar smoke tests, upload artifacts
++#
++# NOTA (2026-03-29): El step "Check for legacy .log( patterns" fue eliminado porque
++# la migración de Logging.log() → Logging.write_event() está 100% completa.
++# Ver: tools/logging_migration_report.md y tools/logging_legacy_findings_20260329T114945Z.json
+ 
+ name: CI — Smoke Tests
+ 
+@@ -107,50 +111,12 @@ jobs:
+           GODOT_BIN=godot ./tools/run_all_tests.sh
+ 
+       # ---------------------------------------------------------------
+-      # 8. Lint: detectar patrones legacy .log( en el código
+-      # ---------------------------------------------------------------
+-      - name: Check for legacy .log( patterns
+-        run: |
+-          echo "Buscando patrones legacy '.log(' en archivos GDScript..."
+-          echo ""
+-
+-          # Buscar .log( en archivos .gd, excluyendo:
+-          #   - Comentarios (líneas que empiezan con #)
+-          #   - Archivos en .godot/ (cache del editor)
+-          #   - Este propio workflow
+-          #   - Archivos de reporte/documentación (.md)
+-          #   - Archivos .log (logs mismos)
+-          MATCHES=$(grep -rn '\.log(' \
+-            --include='*.gd' \
+-            --exclude-dir='.godot' \
+-            papa-gallo/ tools/ \
+-            | grep -v '^\s*#' \
+-            | grep -v '^\s*##' \
+-            | grep -v '_log(' \
+-            | grep -v 'get_log_path' \
+-            | grep -v 'log_path' \
+-            | grep -v 'max_log_files' \
+-            | grep -v 'log_lines' \
+-            | grep -v '_log_lines' \
+-            | grep -v '_save_log' \
+-            | grep -v 'CHANGED_FOR_LOGGING' \
+-            || true)
+-
+-          if [ -n "${MATCHES}" ]; then
+-            echo "::error::Se encontraron llamadas legacy '.log(' en el código."
+-            echo "Las llamadas a .log() están prohibidas — usar Logging.write_event() en su lugar."
+-            echo ""
+-            echo "Ocurrencias encontradas:"
+-            echo "${MATCHES}"
+-            echo ""
+-            echo "Referencia: docs/CONVENTIONS.md, tools/logging_migration_report.md"
+-            exit 1
+-          else
+-            echo "OK — No se encontraron patrones legacy '.log(' en código ejecutable."
+-          fi
+-
++      # 8. Upload de logs como artifacts
+       # ---------------------------------------------------------------
+-      # 9. Upload de logs como artifacts
++      # NOTA: El step de lint "Check for legacy .log( patterns" que existía aquí
++      # fue removido el 2026-03-29 porque la migración de Logging.log() →
++      # Logging.write_event() está 100% completa. No hay llamadas legacy en el código.
++      # Referencia: tools/logging_legacy_findings_20260329T114945Z.json
+       # ---------------------------------------------------------------
+       - name: Upload test logs
+         if: always()
+diff --git a/docs/CI_RUNBOOK.md b/docs/CI_RUNBOOK.md
+index e2ca888..031db63 100644
+--- a/docs/CI_RUNBOOK.md
++++ b/docs/CI_RUNBOOK.md
+@@ -3,7 +3,7 @@
+ **Proyecto:** PapaGallo
+ **Engine:** Godot 4.6 (GL Compatibility)
+ **Pipeline:** GitHub Actions
+-**Ultima actualizacion:** 2026-03-29
++**Ultima actualizacion:** 2026-03-29 (limpieza logging legacy — step lint .log() removido)
+ 
+ > Guia operativa para entender, mantener y diagnosticar el pipeline de CI de PapaGallo.
+ 
+@@ -44,13 +44,7 @@ push/PR a main o develop
+          |
+          v
+ +------------------+
+-| 6. Lint legacy   |  grep -rn '.log(' en *.gd
+-|    .log()        |  FALLA si encuentra llamadas obsoletas
+-+------------------+
+-         |
+-         v
+-+------------------+
+-| 7. Upload logs   |  actions/upload-artifact@v4
++| 6. Upload logs   |  actions/upload-artifact@v4
+ |                  |  papa-gallo/logs/** → 14 dias retencion
+ +------------------+
+ ```
+@@ -125,22 +119,17 @@ Ejecuta `tools/run_all_tests.sh` que:
+ | smoke_test_player | `papa-gallo/tools/smoke_test_player.gd` | Movimiento del jugador (Input simulado, desplazamiento > 1px) |
+ | smoke_test_enemy | `papa-gallo/tools/smoke_test_enemy.gd` | Sistema de oleadas (scripts existen, spawn funciona, enemigo persigue) |
+ 
+-### 2.6 Lint de legacy `.log()`
++### 2.6 Logging — API canónica `write_event()`
+ 
+-El proyecto migro de `Logging.log()` a `Logging.write_event()`. Este step:
++> **Migración completada (2026-03-29).** El step de lint legacy `.log()` fue removido del CI porque la migración está 100% completa.
+ 
+-1. Busca el patron `.log(` en archivos `.gd`
+-2. Excluye falsos positivos:
+-   - Comentarios (`#`, `##`)
+-   - Funciones internas (`_log(`, `_save_log`, `get_log_path`, etc.)
+-   - Cache del editor (`.godot/`)
+-3. Si encuentra matches, **el build falla** con mensaje descriptivo
++La API canónica del Autoload `Logging` es:
++
++```gdscript
++Logging.write_event({"level": "info", "event": "round_started", "data": {"round": 1}})
++```
+ 
+-**Patrones excluidos (no son falsos positivos):**
+-- `_log(` — funcion interna de los smoke tests
+-- `get_log_path` — metodo del sistema de Logging
+-- `log_path`, `max_log_files`, `_log_lines`, `_save_log` — variables/funciones internas
+-- `CHANGED_FOR_LOGGING` — marcador de migracion en comentarios
++No existen llamadas a `Logging.log()` ni `log()` en el código ejecutable. El reporte de auditoría está en `tools/logging_migration_report.md`.
+ 
+ ### 2.7 Upload de Logs
+ 
+@@ -245,27 +234,17 @@ docker run --rm -v $(pwd):/game -w /game ubuntu:22.04 bash -c "
+ "
+ ```
+ 
+-### 5.3 El CI falla en "Check for legacy .log( patterns"
+-
+-**Sintoma:** El step de lint encuentra llamadas `.log(`.
+-
+-**Solucion:**
+-1. Leer el mensaje de error — muestra archivo y linea exactos
+-2. Reemplazar la llamada `.log(...)` por `write_event({...})`
+-3. Referencia: `tools/logging_migration_report.md`
+-
+-**Ejemplo de migracion:**
+-```gdscript
+-# ANTES (legacy — fallara CI):
+-Logging.log("info", "round_started", {"round": round})
+-
+-# DESPUES (correcto):
+-Logging.write_event({
+-    "level": "info",
+-    "event": "round_started",
+-    "data": {"round": round}
+-})
+-```
++### 5.3 ~~El CI falla en "Check for legacy .log( patterns"~~ (Eliminado)
++
++> **Este step fue removido del CI el 2026-03-29.** La migración de `Logging.log()` a `Logging.write_event()` está 100% completa. No existe ni existirá este error en el pipeline actual.
++>
++> Si necesitas verificar que no hay llamadas legacy localmente:
++> ```bash
++> # Debe devolver 0 resultados
++> rg "Logging\.log\s*\(" --type gd papa-gallo/ tools/
++> ```
++>
++> Ver `tools/logging_migration_report.md` para el historial de auditoría.
+ 
+ ### 5.4 Los logs no se suben como artifacts
+ 
+diff --git a/docs/SETUP_DEV_ENV.md b/docs/SETUP_DEV_ENV.md
+index a392091..7015d3e 100644
+--- a/docs/SETUP_DEV_ENV.md
++++ b/docs/SETUP_DEV_ENV.md
+@@ -510,22 +510,23 @@ godot --headless --path papa-gallo --script tools/smoke_test_player.gd
+ godot --headless --path papa-gallo --script tools/smoke_test_enemy.gd
+ ```
+ 
+-### 12.3 Verificar que no hay llamadas legacy `.log()`
++### 12.3 API canónica de Logging — `write_event()`
+ 
+-El CI falla si encuentra llamadas `.log()` en archivos GDScript (la API correcta es `Logging.write_event()`).
++> **Migración completada (2026-03-29).** No hay llamadas legacy `Logging.log()` en el codebase. El CI ya no tiene un step de lint para patrones obsoletos.
+ 
+-Para verificar localmente:
++La API correcta es:
++
++```gdscript
++Logging.write_event({"level": "info", "event": "round_started", "data": {"round": 1}})
++```
++
++Para confirmar que no hay regresiones localmente:
+ ```bash
+-# Buscar patrones legacy (debería no devolver nada)
+-grep -rn '\.log(' --include='*.gd' papa-gallo/ tools/ \
+-  | grep -v '^\s*#' \
+-  | grep -v '_log(' \
+-  | grep -v 'get_log_path' \
+-  | grep -v 'log_path' \
+-  | grep -v 'CHANGED_FOR_LOGGING'
++# Debe devolver 0 resultados
++rg "Logging\.log\s*\(" --type gd papa-gallo/ tools/
+ ```
+ 
+-Si el comando devuelve lineas, esas llamadas deben migrar a `write_event()`. Ver `tools/logging_migration_report.md`.
++Ver `tools/logging_migration_report.md` para el historial de auditoría.
+ 
+ ### 12.4 Que hace el CI
+ 
+@@ -535,8 +536,7 @@ El pipeline de GitHub Actions (`.github/workflows/ci.yml`) ejecuta en `ubuntu-la
+ 2. **Download** de Godot 4.6 headless para Linux (con cache)
+ 3. **Import** del proyecto Godot (genera `.godot/imported/`)
+ 4. **Smoke tests** via `tools/run_all_tests.sh`
+-5. **Lint** de patrones legacy `.log(` — falla el build si los encuentra
+-6. **Upload** de logs (`papa-gallo/logs/**`) como artifacts (14 dias de retencion)
++5. **Upload** de logs (`papa-gallo/logs/**`) como artifacts (14 dias de retencion)
+ 
+ Para mas detalles, ver `docs/CI_RUNBOOK.md`.
+ 
+diff --git a/docs/TDD_GODOT_4_6.md b/docs/TDD_GODOT_4_6.md
+index 15a765c..d196c41 100644
+--- a/docs/TDD_GODOT_4_6.md
++++ b/docs/TDD_GODOT_4_6.md
+@@ -235,8 +235,8 @@ El Autoload `Logging` provee observabilidad local robusta mediante escritura de
+ ### API pública
+ 
+ ```gdscript
+-# Registrar cualquier evento desde cualquier script
+-Logging.log("info", "my_event", {"key": "value"})
++# Registrar cualquier evento desde cualquier script (API canónica)
++Logging.write_event({"level": "info", "event": "my_event", "data": {"key": "value"}})
+ 
+ # Forzar escritura a disco (útil antes de operaciones críticas)
+ Logging.flush()
+@@ -267,7 +267,7 @@ var path := Logging.get_log_path()
+ 
+ ### Limitaciones conocidas
+ 
+-- Las escrituras son **síncronas** (open/write/close por flush) — evitar `log()` en `_physics_process()`.
++- Las escrituras son **síncronas** (open/write/close por flush) — evitar `write_event()` en `_physics_process()`.
+ - En modo headless (scripts de smoke test), el Timer no está disponible; se usa `auto_flush_count = 1` para flush inmediato.
+ - Los archivos de log **no están encriptados** — no incluir PII en los campos `data`.
+ 

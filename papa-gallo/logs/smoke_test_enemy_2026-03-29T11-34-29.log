@@ -1,0 +1,48 @@
+====== SMOKE TEST ENEMY — PapaGallo ======
+Godot versión: 4.6.1-stable (official)
+Proyecto: /Users/xojevilches/Projects/withAmando/gameDevelopment/papa-gallo/
+Timestamp: 2026-03-29T11-34-29
+
+--- Check 1: Existencia de scripts ---
+  [OK] enemy.gd
+  [OK] spawner.gd
+  [OK] round_manager.gd
+  Verificando escena Enemy.tscn...
+  [OK] Enemy.tscn existe
+--- Check 2: Propiedades exportadas de Enemy ---
+  [OK] Propiedad 'speed' encontrada
+  [OK] Propiedad 'aggro_range' encontrada
+  [OK] Propiedad 'stop_distance' encontrada
+--- Check 3: spawn_wave(2) instancia 2 enemigos ---
+  Enemigos activos tras spawn_wave(2): 2
+  [OK] 2 enemigos spawneados correctamente
+--- Check 4: Enemigo persigue al jugador ---
+  Distancia inicial: 200.0 px (aggro_range=300.0, stop_distance=16.0)
+  Velocidad del enemigo: (-80.0, 0.0) | Dot con dirección esperada: 1.000
+  [OK] Persecución verificada (dot=1.000)
+
+====== RESULTADOS ======
+  [PASS] Script 'enemy.gd' cargado desde 'res://scripts/enemy.gd'
+  [PASS] Script 'spawner.gd' cargado desde 'res://scripts/spawner.gd'
+  [PASS] Script 'round_manager.gd' cargado desde 'res://scripts/round_manager.gd'
+  [PASS] Enemy.tscn encontrada en 'res://scenes/enemies/Enemy.tscn'
+  [PASS] Propiedad 'speed' declarada en enemy.gd
+  [PASS] Propiedad 'aggro_range' declarada en enemy.gd
+  [PASS] Propiedad 'stop_distance' declarada en enemy.gd
+  [PASS] spawn_wave(2) creó exactamente 2 enemigos activos
+  [PASS] Enemigo persigue al jugador — velocity apunta al jugador (dot=1.000 > 0.9)
+
+✅ SMOKE TEST PASSED — 9 checks OK
+
+====== RESULTADOS ======
+  [PASS] Script 'enemy.gd' cargado desde 'res://scripts/enemy.gd'
+  [PASS] Script 'spawner.gd' cargado desde 'res://scripts/spawner.gd'
+  [PASS] Script 'round_manager.gd' cargado desde 'res://scripts/round_manager.gd'
+  [PASS] Enemy.tscn encontrada en 'res://scenes/enemies/Enemy.tscn'
+  [PASS] Propiedad 'speed' declarada en enemy.gd
+  [PASS] Propiedad 'aggro_range' declarada en enemy.gd
+  [PASS] Propiedad 'stop_distance' declarada en enemy.gd
+  [PASS] spawn_wave(2) creó exactamente 2 enemigos activos
+  [PASS] Enemigo persigue al jugador — velocity apunta al jugador (dot=1.000 > 0.9)
+
+✅ SMOKE TEST PASSED — 9 checks OK

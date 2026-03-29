@@ -1,0 +1,73 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 2553305..54ec6bd 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -3,7 +3,11 @@
+ #
+ # Triggers: push y PR a main/develop
+ # Runner: ubuntu-latest
+-# Steps: checkout, descargar Godot 4.6 headless, ejecutar smoke tests, lint legacy .log(, upload artifacts
++# Steps: checkout, descargar Godot 4.6 headless, ejecutar smoke tests, upload artifacts
++#
++# NOTA (2026-03-29): El step "Check for legacy .log( patterns" fue eliminado porque
++# la migración de Logging.log() → Logging.write_event() está 100% completa.
++# Ver: tools/logging_migration_report.md y tools/logging_legacy_findings_20260329T114945Z.json
+ 
+ name: CI — Smoke Tests
+ 
+@@ -107,50 +111,12 @@ jobs:
+           GODOT_BIN=godot ./tools/run_all_tests.sh
+ 
+       # ---------------------------------------------------------------
+-      # 8. Lint: detectar patrones legacy .log( en el código
+-      # ---------------------------------------------------------------
+-      - name: Check for legacy .log( patterns
+-        run: |
+-          echo "Buscando patrones legacy '.log(' en archivos GDScript..."
+-          echo ""
+-
+-          # Buscar .log( en archivos .gd, excluyendo:
+-          #   - Comentarios (líneas que empiezan con #)
+-          #   - Archivos en .godot/ (cache del editor)
+-          #   - Este propio workflow
+-          #   - Archivos de reporte/documentación (.md)
+-          #   - Archivos .log (logs mismos)
+-          MATCHES=$(grep -rn '\.log(' \
+-            --include='*.gd' \
+-            --exclude-dir='.godot' \
+-            papa-gallo/ tools/ \
+-            | grep -v '^\s*#' \
+-            | grep -v '^\s*##' \
+-            | grep -v '_log(' \
+-            | grep -v 'get_log_path' \
+-            | grep -v 'log_path' \
+-            | grep -v 'max_log_files' \
+-            | grep -v 'log_lines' \
+-            | grep -v '_log_lines' \
+-            | grep -v '_save_log' \
+-            | grep -v 'CHANGED_FOR_LOGGING' \
+-            || true)
+-
+-          if [ -n "${MATCHES}" ]; then
+-            echo "::error::Se encontraron llamadas legacy '.log(' en el código."
+-            echo "Las llamadas a .log() están prohibidas — usar Logging.write_event() en su lugar."
+-            echo ""
+-            echo "Ocurrencias encontradas:"
+-            echo "${MATCHES}"
+-            echo ""
+-            echo "Referencia: docs/CONVENTIONS.md, tools/logging_migration_report.md"
+-            exit 1
+-          else
+-            echo "OK — No se encontraron patrones legacy '.log(' en código ejecutable."
+-          fi
+-
++      # 8. Upload de logs como artifacts
+       # ---------------------------------------------------------------
+-      # 9. Upload de logs como artifacts
++      # NOTA: El step de lint "Check for legacy .log( patterns" que existía aquí
++      # fue removido el 2026-03-29 porque la migración de Logging.log() →
++      # Logging.write_event() está 100% completa. No hay llamadas legacy en el código.
++      # Referencia: tools/logging_legacy_findings_20260329T114945Z.json
+       # ---------------------------------------------------------------
+       - name: Upload test logs
+         if: always()

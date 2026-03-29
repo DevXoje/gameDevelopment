@@ -235,8 +235,8 @@ El Autoload `Logging` provee observabilidad local robusta mediante escritura de 
 ### API pública
 
 ```gdscript
-# Registrar cualquier evento desde cualquier script
-Logging.log("info", "my_event", {"key": "value"})
+# Registrar cualquier evento desde cualquier script (API canónica)
+Logging.write_event({"level": "info", "event": "my_event", "data": {"key": "value"}})
 
 # Forzar escritura a disco (útil antes de operaciones críticas)
 Logging.flush()
@@ -267,7 +267,7 @@ var path := Logging.get_log_path()
 
 ### Limitaciones conocidas
 
-- Las escrituras son **síncronas** (open/write/close por flush) — evitar `log()` en `_physics_process()`.
+- Las escrituras son **síncronas** (open/write/close por flush) — evitar `write_event()` en `_physics_process()`.
 - En modo headless (scripts de smoke test), el Timer no está disponible; se usa `auto_flush_count = 1` para flush inmediato.
 - Los archivos de log **no están encriptados** — no incluir PII en los campos `data`.
 

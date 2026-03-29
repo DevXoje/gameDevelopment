@@ -68,7 +68,7 @@ var is_round_active: bool = false
 var _spawner: Node = null
 var _round_start_time: float = 0.0
 # CHANGED: safe logging accessor — referencia cacheada al Autoload Logging (null si no disponible).
-var _logger: Node = null
+var _logger = null
 
 # ---------------------------------------------------------------------------
 # Ciclo de vida
@@ -109,16 +109,18 @@ func start_round() -> void:
 	print("[RoundManager] ▶ Iniciando ronda %d con %d enemigos." % [current_round, enemy_count])
 
 	# Registrar evento de inicio de ronda.
-	var logger_start := _get_logger()
-	if logger_start:
-		logger_start.write_event({
-			"level": "info",
-			"event": "round_started",
-			"data": {
-				"round": current_round,
-				"spawn_count": enemy_count,
-			},
-		})
+	if has_node("/root/Logging"):
+		# CHANGED: safe logging accessor
+		var logger := _get_logger()
+		if logger:
+			logger.write_event({
+				"level": "info",
+				"event": "round_started",
+				"data": {
+					"round": current_round,
+					"spawn_count": enemy_count,
+				},
+			})
 
 	# Sincronizar con GameManager si está disponible.
 	if Engine.has_singleton("GameManager") or has_node("/root/GameManager"):
@@ -147,17 +149,19 @@ func stop_round() -> void:
 	print("[RoundManager] ⏸ Ronda %d detenida." % current_round)
 
 	# Registrar evento de fin de ronda.
-	var logger_stop := _get_logger()
-	if logger_stop:
-		logger_stop.write_event({
-			"level": "info",
-			"event": "round_ended",
-			"data": {
-				"round": current_round,
-				"duration_s": snappedf(duration, 0.01),
-				"enemies_remaining": _spawner.get_active_count() if (_spawner != null and _spawner.has_method("get_active_count")) else -1,
-			},
-		})
+	if has_node("/root/Logging"):
+		# CHANGED: safe logging accessor
+		var logger := _get_logger()
+		if logger:
+			logger.write_event({
+				"level": "info",
+				"event": "round_ended",
+				"data": {
+					"round": current_round,
+					"duration_s": snappedf(duration, 0.01),
+					"enemies_remaining": _spawner.get_active_count() if (_spawner != null and _spawner.has_method("get_active_count")) else -1,
+				},
+			})
 
 	round_stopped.emit(current_round)
 

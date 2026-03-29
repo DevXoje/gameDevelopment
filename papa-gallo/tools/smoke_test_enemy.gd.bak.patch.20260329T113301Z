@@ -366,7 +366,7 @@ func _log_smoke_result(passed: bool, suite: String, pass_count: int, fail_count:
 	if _logging == null:
 		return
 	var event := "smoke_test_passed" if passed else "smoke_test_failed"
-	# Nota: escribe el resultado con write_event() — evita conflicto con builtin GDScript log(float)
+	# CHANGED_FOR_LOGGING: convertido de log(level, event, dict) → write_event({dict}) — evita conflicto con builtin GDScript log(float)
 	_logging.write_event({
 		"level": "info" if passed else "error",
 		"event": event,

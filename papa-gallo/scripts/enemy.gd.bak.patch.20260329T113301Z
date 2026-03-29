@@ -53,7 +53,7 @@ var _player: Node2D = null
 var _spawn_position: Vector2 = Vector2.ZERO
 
 # CHANGED: safe logging accessor — referencia cacheada al Autoload Logging (null si no disponible).
-var _logger: Node = null
+var _logger = null
 
 # ---------------------------------------------------------------------------
 # Ciclo de vida

@@ -1,0 +1,128 @@
+# .github/workflows/ci.yml
+# CI Pipeline para PapaGallo — Godot 4.6 headless smoke tests
+#
+# Triggers: push y PR a main/develop
+# Runner: ubuntu-latest
+# Steps: checkout, descargar Godot 4.6 headless, ejecutar smoke tests, upload artifacts
+#
+# NOTA (2026-03-29): El step "Check for legacy .log( patterns" fue eliminado porque
+# la migración de Logging.log() → Logging.write_event() está 100% completa.
+# Ver: tools/logging_migration_report.md y tools/logging_legacy_findings_20260329T114945Z.json
+
+name: CI — Smoke Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  # Godot 4.6 stable — actualizar cuando cambie la versión del proyecto
+  GODOT_VERSION: "4.6-stable"
+  GODOT_RELEASE_URL: "https://github.com/godotengine/godot-builds/releases/download/4.6-stable/Godot_v4.6-stable_linux.x86_64.zip"
+  GODOT_EXPORT_TEMPLATES_URL: "https://github.com/godotengine/godot-builds/releases/download/4.6-stable/Godot_v4.6-stable_export_templates.tpz"
+
+# Permisos mínimos necesarios
+permissions:
+  contents: read
+
+jobs:
+  smoke-tests:
+    name: Smoke Tests (Godot 4.6 Headless)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      # ---------------------------------------------------------------
+      # 1. Checkout
+      # ---------------------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ---------------------------------------------------------------
+      # 2. Cache del binario de Godot
+      # ---------------------------------------------------------------
+      - name: Cache Godot binary
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: ~/godot-bin
+          key: godot-${{ env.GODOT_VERSION }}-linux-x86_64
+
+      # ---------------------------------------------------------------
+      # 3. Descargar Godot 4.6 headless (si no está en cache)
+      # ---------------------------------------------------------------
+      - name: Download Godot 4.6 headless
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/godot-bin
+          echo "::group::Downloading Godot ${GODOT_VERSION}..."
+          curl -fSL "${GODOT_RELEASE_URL}" -o /tmp/godot.zip
+          unzip -o /tmp/godot.zip -d /tmp/godot-extract
+          # El zip contiene un binario con nombre como Godot_v4.6-stable_linux.x86_64
+          # Buscamos cualquier ejecutable dentro del directorio extraído
+          GODOT_EXTRACTED=$(find /tmp/godot-extract -name 'Godot_*' -type f | head -1)
+          if [ -z "${GODOT_EXTRACTED}" ]; then
+            echo "::error::No se encontró el binario de Godot en el zip descargado"
+            ls -laR /tmp/godot-extract
+            exit 1
+          fi
+          cp "${GODOT_EXTRACTED}" ~/godot-bin/godot
+          chmod +x ~/godot-bin/godot
+          echo "::endgroup::"
+          echo "Godot instalado: $(~/godot-bin/godot --version)"
+
+      # ---------------------------------------------------------------
+      # 4. Agregar Godot al PATH
+      # ---------------------------------------------------------------
+      - name: Add Godot to PATH
+        run: echo "${HOME}/godot-bin" >> "${GITHUB_PATH}"
+
+      - name: Verify Godot installation
+        run: |
+          which godot
+          godot --version
+
+      # ---------------------------------------------------------------
+      # 5. Reimportar proyecto (necesario en primera ejecución headless)
+      # ---------------------------------------------------------------
+      - name: Import Godot project
+        run: |
+          # Godot necesita ejecutar una vez para generar .godot/imported/
+          # Usamos --headless --quit para importar y salir inmediatamente.
+          # El timeout protege contra cuelgues en el import.
+          timeout 120 godot --headless --path papa-gallo --import || true
+          echo "Import completado. Contenido de .godot/:"
+          ls -la papa-gallo/.godot/ 2>/dev/null || echo "(directorio .godot aún no existe — normal en primer run)"
+
+      # ---------------------------------------------------------------
+      # 6. Crear directorio de logs
+      # ---------------------------------------------------------------
+      - name: Prepare logs directory
+        run: mkdir -p papa-gallo/logs
+
+      # ---------------------------------------------------------------
+      # 7. Ejecutar smoke tests via run_all_tests.sh
+      # ---------------------------------------------------------------
+      - name: Run smoke tests
+        run: |
+          chmod +x tools/run_all_tests.sh
+          GODOT_BIN=godot ./tools/run_all_tests.sh
+
+      # ---------------------------------------------------------------
+      # 8. Upload de logs como artifacts
+      # ---------------------------------------------------------------
+      # NOTA: El step de lint "Check for legacy .log( patterns" que existía aquí
+      # fue removido el 2026-03-29 porque la migración de Logging.log() →
+      # Logging.write_event() está 100% completa. No hay llamadas legacy en el código.
+      # Referencia: tools/logging_legacy_findings_20260329T114945Z.json
+      # ---------------------------------------------------------------
+      - name: Upload test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: papa-gallo-test-logs
+          path: papa-gallo/logs/**
+          retention-days: 14
+          if-no-files-found: warn

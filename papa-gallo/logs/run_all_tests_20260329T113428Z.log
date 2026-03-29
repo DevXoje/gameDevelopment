@@ -1,0 +1,145 @@
+[2026-03-29T11:34:28Z] ====== run_all_tests.sh — papa-gallo CI Smoke Runner ======
+[2026-03-29T11:34:28Z] Proyecto:  /Users/xojevilches/Projects/withAmando/gameDevelopment/papa-gallo
+[2026-03-29T11:34:28Z] Log:       /Users/xojevilches/Projects/withAmando/gameDevelopment/papa-gallo/logs/run_all_tests_20260329T113428Z.log
+[2026-03-29T11:34:28Z] Timestamp: 20260329T113428Z
+[2026-03-29T11:34:28Z] Verbose:   true
+[2026-03-29T11:34:28Z] 
+[2026-03-29T11:34:28Z] Godot encontrado: godot (versión: 4.6.1.stable.official.14d19694e)
+[2026-03-29T11:34:28Z] 
+[2026-03-29T11:34:28Z] --- Iniciando: smoke_test_player ---
+[2026-03-29T11:34:28Z] Script: tools/smoke_test_player.gd
+[2026-03-29T11:34:29Z] --- Salida de smoke_test_player (exit_code=0) ---
+  Godot Engine v4.6.1.stable.official.14d19694e - https://godotengine.org
+  
+  [SmokeTest] ====== INICIO DEL SMOKE TEST PLAYER ======
+  [SmokeTest] Godot versión: 4.6.1-stable (official)
+  [SmokeTest] Proyecto: /Users/xojevilches/Projects/withAmando/gameDevelopment/papa-gallo/
+  [Logging] Sesión iniciada: 20260329_113429_2093 → /Users/xojevilches/Projects/withAmando/gameDevelopment/papa-gallo/logs/session_20260329_113429_2093.log
+  [SmokeTest] Logging inicializado. Log: /Users/xojevilches/Projects/withAmando/gameDevelopment/papa-gallo/logs/session_20260329_113429_2093.log
+  [SmokeTest] --- Check 1: Existencia de player.gd ---
+    [OK] Script cargado.
+  [SmokeTest] --- Check 2: Acciones del Input Map ---
+    [OK] Acción 'move_left' existe.
+    [OK] Acción 'move_right' existe.
+    [OK] Acción 'move_up' existe.
+    [OK] Acción 'move_down' existe.
+    [OK] Acción 'sprint' existe.
+  [SmokeTest] --- Check 3: Constantes del script player.gd ---
+    [OK] Propiedad 'speed' encontrada.
+    [OK] Propiedad 'sprint_multiplier' encontrada.
+  
+  [SmokeTest] ====== RESULTADOS ======
+    [PASS] player.gd cargado correctamente desde 'res://scripts/player.gd'
+    [PASS] Input action 'move_left' registrada
+    [PASS] Input action 'move_right' registrada
+    [PASS] Input action 'move_up' registrada
+    [PASS] Input action 'move_down' registrada
+    [PASS] Input action 'sprint' registrada
+    [PASS] Propiedad exportada 'speed' declarada en player.gd
+    [PASS] Propiedad exportada 'sprint_multiplier' declarada en player.gd
+  
+  [SmokeTest] ✅ SMOKE TEST PASSED — 8 checks OK
+  [Logging] Sesión iniciada: 20260329_113429_4562 → /Users/xojevilches/Projects/withAmando/gameDevelopment/papa-gallo/logs/session_20260329_113429_4562.log
+  [Logging] Modo headless detectado — flush inmediato activado.
+  [GameManager] Listo. Ronda: 0 | Puntos: 0
+  [InputManager] No hay bindings guardados. Usando defaults.
+  [InputManager] Listo. Bindings cargados desde: user://input_bindings.cfg
+  [AudioManager] Listo. Buses: Music, SFX.
+  [SaveManager] Listo. Directorio user://: /Users/xojevilches/Library/Application Support/Godot/app_userdata/PapaGallo
+  [DebugManager] Modo DEBUG activo. Comandos de debug disponibles.
+  [DebugManager] Acciones de debug registradas (TODO: shortcuts).
+  [Logging] Sesión iniciada: 20260329_113429_5094 → /Users/xojevilches/Projects/withAmando/gameDevelopment/papa-gallo/logs/session_20260329_113429_5094.log
+  [Logging] Modo headless detectado — flush inmediato activado.
+[2026-03-29T11:34:29Z] --- Fin salida de smoke_test_player ---
+[2026-03-29T11:34:29Z] ✅ smoke_test_player PASÓ (exit_code=0)
+[2026-03-29T11:34:29Z] 
+[2026-03-29T11:34:29Z] --- Iniciando: smoke_test_enemy ---
+[2026-03-29T11:34:29Z] Script: tools/smoke_test_enemy.gd
+[2026-03-29T11:34:29Z] --- Salida de smoke_test_enemy (exit_code=0) ---
+  Godot Engine v4.6.1.stable.official.14d19694e - https://godotengine.org
+  
+  [SmokeTest] ====== SMOKE TEST ENEMY — PapaGallo ======
+  [SmokeTest] Godot versión: 4.6.1-stable (official)
+  [SmokeTest] Proyecto: /Users/xojevilches/Projects/withAmando/gameDevelopment/papa-gallo/
+  [SmokeTest] Timestamp: 2026-03-29T11-34-29
+  [SmokeTest] 
+  [Logging] Sesión iniciada: 20260329_113429_4817 → /Users/xojevilches/Projects/withAmando/gameDevelopment/papa-gallo/logs/session_20260329_113429_4817.log
+  [SmokeTest] Logging inicializado. Log: /Users/xojevilches/Projects/withAmando/gameDevelopment/papa-gallo/logs/session_20260329_113429_4817.log
+  [SmokeTest] --- Check 1: Existencia de scripts ---
+  [SmokeTest]   [OK] enemy.gd
+  [SmokeTest]   [OK] spawner.gd
+  [SmokeTest]   [OK] round_manager.gd
+  [SmokeTest]   Verificando escena Enemy.tscn...
+  [SmokeTest]   [OK] Enemy.tscn existe
+  [SmokeTest] --- Check 2: Propiedades exportadas de Enemy ---
+  [SmokeTest]   [OK] Propiedad 'speed' encontrada
+  [SmokeTest]   [OK] Propiedad 'aggro_range' encontrada
+  [SmokeTest]   [OK] Propiedad 'stop_distance' encontrada
+  [SmokeTest] --- Check 3: spawn_wave(2) instancia 2 enemigos ---
+  [Logging] Sesión iniciada: 20260329_113429_8058 → /Users/xojevilches/Projects/withAmando/gameDevelopment/papa-gallo/logs/session_20260329_113429_8058.log
+  [Logging] Modo headless detectado — flush inmediato activado.
+  [GameManager] Listo. Ronda: 0 | Puntos: 0
+  [InputManager] No hay bindings guardados. Usando defaults.
+  [InputManager] Listo. Bindings cargados desde: user://input_bindings.cfg
+  [AudioManager] Listo. Buses: Music, SFX.
+  [SaveManager] Listo. Directorio user://: /Users/xojevilches/Library/Application Support/Godot/app_userdata/PapaGallo
+  [DebugManager] Modo DEBUG activo. Comandos de debug disponibles.
+  [DebugManager] Acciones de debug registradas (TODO: shortcuts).
+  [Logging] Sesión iniciada: 20260329_113429_3381 → /Users/xojevilches/Projects/withAmando/gameDevelopment/papa-gallo/logs/session_20260329_113429_3381.log
+  [Logging] Modo headless detectado — flush inmediato activado.
+  [Spawner] Puntos de spawn por defecto inicializados: 4 puntos
+  [Spawner] Listo con 4 puntos de spawn.
+  [Spawner] Spawneando oleada de 2 enemigos...
+  [Enemy] Spawneado en (-400.0, -300.0) — player: @CharacterBody2D@4:<CharacterBody2D#29863445986>
+  [Spawner]   Enemigo 1 spawneado en (-400.0, -300.0)
+  [Enemy] Spawneado en (400.0, -300.0) — player: @CharacterBody2D@4:<CharacterBody2D#29863445986>
+  [Spawner]   Enemigo 2 spawneado en (400.0, -300.0)
+  [Spawner] Oleada de 2 completada. Enemigos activos: 2
+  [SmokeTest]   Enemigos activos tras spawn_wave(2): 2
+  [SmokeTest]   [OK] 2 enemigos spawneados correctamente
+  [SmokeTest] --- Check 4: Enemigo persigue al jugador ---
+  [Enemy] Spawneado en (840.0, 360.0) — player: @CharacterBody2D@8:<CharacterBody2D#30735861218>
+  [SmokeTest]   Distancia inicial: 200.0 px (aggro_range=300.0, stop_distance=16.0)
+  [SmokeTest]   Velocidad del enemigo: (-80.0, 0.0) | Dot con dirección esperada: 1.000
+  [SmokeTest]   [OK] Persecución verificada (dot=1.000)
+  [SmokeTest] 
+  [SmokeTest] ====== RESULTADOS ======
+  [SmokeTest]   [PASS] Script 'enemy.gd' cargado desde 'res://scripts/enemy.gd'
+  [SmokeTest]   [PASS] Script 'spawner.gd' cargado desde 'res://scripts/spawner.gd'
+  [SmokeTest]   [PASS] Script 'round_manager.gd' cargado desde 'res://scripts/round_manager.gd'
+  [SmokeTest]   [PASS] Enemy.tscn encontrada en 'res://scenes/enemies/Enemy.tscn'
+  [SmokeTest]   [PASS] Propiedad 'speed' declarada en enemy.gd
+  [SmokeTest]   [PASS] Propiedad 'aggro_range' declarada en enemy.gd
+  [SmokeTest]   [PASS] Propiedad 'stop_distance' declarada en enemy.gd
+  [SmokeTest]   [PASS] spawn_wave(2) creó exactamente 2 enemigos activos
+  [SmokeTest]   [PASS] Enemigo persigue al jugador — velocity apunta al jugador (dot=1.000 > 0.9)
+  [SmokeTest] 
+  [SmokeTest] ✅ SMOKE TEST PASSED — 9 checks OK
+  ✅ SMOKE TEST PASSED — 9 checks OK
+  [SmokeTest] Log guardado en: /Users/xojevilches/Projects/withAmando/gameDevelopment/papa-gallo/logs/smoke_test_enemy_2026-03-29T11-34-29.log
+  [SmokeTest] 
+  [SmokeTest] ====== RESULTADOS ======
+  [SmokeTest]   [PASS] Script 'enemy.gd' cargado desde 'res://scripts/enemy.gd'
+  [SmokeTest]   [PASS] Script 'spawner.gd' cargado desde 'res://scripts/spawner.gd'
+  [SmokeTest]   [PASS] Script 'round_manager.gd' cargado desde 'res://scripts/round_manager.gd'
+  [SmokeTest]   [PASS] Enemy.tscn encontrada en 'res://scenes/enemies/Enemy.tscn'
+  [SmokeTest]   [PASS] Propiedad 'speed' declarada en enemy.gd
+  [SmokeTest]   [PASS] Propiedad 'aggro_range' declarada en enemy.gd
+  [SmokeTest]   [PASS] Propiedad 'stop_distance' declarada en enemy.gd
+  [SmokeTest]   [PASS] spawn_wave(2) creó exactamente 2 enemigos activos
+  [SmokeTest]   [PASS] Enemigo persigue al jugador — velocity apunta al jugador (dot=1.000 > 0.9)
+  [SmokeTest] 
+  [SmokeTest] ✅ SMOKE TEST PASSED — 9 checks OK
+  ✅ SMOKE TEST PASSED — 9 checks OK
+  [SmokeTest] Log guardado en: /Users/xojevilches/Projects/withAmando/gameDevelopment/papa-gallo/logs/smoke_test_enemy_2026-03-29T11-34-29.log
+[2026-03-29T11:34:29Z] --- Fin salida de smoke_test_enemy ---
+[2026-03-29T11:34:29Z] ✅ smoke_test_enemy PASÓ (exit_code=0)
+[2026-03-29T11:34:29Z] 
+[2026-03-29T11:34:29Z] ====== RESUMEN ======
+[2026-03-29T11:34:29Z] smoke_test_player: ✅ PASSED
+[2026-03-29T11:34:29Z] smoke_test_enemy:  ✅ PASSED
+[2026-03-29T11:34:29Z] 
+[2026-03-29T11:34:29Z] 🟢 RESULTADO FINAL: PASSED — ambos smoke tests pasaron.
+[2026-03-29T11:34:29Z]    Log completo en: /Users/xojevilches/Projects/withAmando/gameDevelopment/papa-gallo/logs/run_all_tests_20260329T113428Z.log
+[2026-03-29T11:34:29Z] 
+[2026-03-29T11:34:29Z] ====== FIN run_all_tests.sh (exit=0) ======

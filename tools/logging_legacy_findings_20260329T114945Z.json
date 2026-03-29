@@ -1,0 +1,158 @@
+{
+  "timestamp": "2026-03-29T11:49:45Z",
+  "scan_root": "gameDevelopment",
+  "summary": {
+    "total_findings": 13,
+    "replace": 3,
+    "delete": 0,
+    "ambiguous": 0,
+    "doc_update": 7,
+    "ci_update": 3,
+    "gd_executable_legacy_calls": 0,
+    "shims_in_Logging_gd": 0
+  },
+  "findings": [
+    {
+      "id": 1,
+      "file": "docs/TDD_GODOT_4_6.md",
+      "line": 239,
+      "snippet": "Logging.log(\"info\", \"my_event\", {\"key\": \"value\"})",
+      "reason_guess": "Ejemplo de código en doc TDD usa la API antigua Logging.log() en lugar de Logging.write_event()",
+      "classification": "Replace",
+      "action": "Reemplazar Logging.log(\"info\", \"my_event\", {\"key\": \"value\"}) → Logging.write_event({\"level\": \"info\", \"event\": \"my_event\", \"data\": {\"key\": \"value\"}})",
+      "reason": "Ejemplo en documentación muestra la API incorrecta; puede confundir a nuevos desarrolladores"
+    },
+    {
+      "id": 2,
+      "file": "docs/TDD_GODOT_4_6.md",
+      "line": 270,
+      "snippet": "Las escrituras son síncronas (open/write/close por flush) — evitar `log()` en `_physics_process()`.",
+      "reason_guess": "Menciona log() como método en contexto de advertencia",
+      "classification": "Replace",
+      "action": "Cambiar `log()` → `write_event()` en la advertencia de rendimiento",
+      "reason": "La advertencia sigue nombrando la función obsoleta; usar el nombre correcto"
+    },
+    {
+      "id": 3,
+      "file": "docs/CI_RUNBOOK.md",
+      "line": 47,
+      "snippet": "| 6. Lint legacy   |  grep -rn '.log(' en *.gd",
+      "reason_guess": "Diagrama ASCII del pipeline describe paso de lint legacy que ya debe ser eliminado",
+      "classification": "Replace",
+      "action": "Actualizar diagrama del pipeline: eliminar fila de 'Lint legacy .log()' ya que la migración está completa",
+      "reason": "El paso de lint legacy ya no es necesario; el diagrama debe reflejar el pipeline actual"
+    },
+    {
+      "id": 4,
+      "file": "docs/CI_RUNBOOK.md",
+      "line": 128,
+      "snippet": "### 2.6 Lint de legacy `.log()`",
+      "reason_guess": "Sección completa que documenta el step de lint legacy que se va a eliminar del CI",
+      "classification": "Replace",
+      "action": "Reemplazar sección 2.6 para indicar que el lint fue removido por migración completa y la API canónica es write_event()",
+      "reason": "La sección describe un step que ya no existe en el CI; debe actualizarse para reflejar la realidad"
+    },
+    {
+      "id": 5,
+      "file": "docs/CI_RUNBOOK.md",
+      "line": 248,
+      "snippet": "### 5.3 El CI falla en \"Check for legacy .log( patterns\"",
+      "reason_guess": "Sección de troubleshooting para un error de CI que ya no puede ocurrir",
+      "classification": "Replace",
+      "action": "Eliminar sección 5.3 de troubleshooting (ya no aplica) y reemplazar con nota de migración completada",
+      "reason": "El step ya no existe en el CI; la sección de troubleshooting crea confusión innecesaria"
+    },
+    {
+      "id": 6,
+      "file": "docs/SETUP_DEV_ENV.md",
+      "line": 513,
+      "snippet": "### 12.3 Verificar que no hay llamadas legacy `.log()`",
+      "reason_guess": "Sección del setup guide que instruye a verificar patrones legacy con grep manual",
+      "classification": "Replace",
+      "action": "Reemplazar sección 12.3 para reflejar que la migración está completa y la verificación ya no es necesaria",
+      "reason": "Guía de setup no debe instruir a buscar patrones que ya no existen"
+    },
+    {
+      "id": 7,
+      "file": "docs/SETUP_DEV_ENV.md",
+      "line": 538,
+      "snippet": "5. **Lint** de patrones legacy `.log(` — falla el build si los encuentra",
+      "reason_guess": "Lista del CI en setup guide menciona step de lint legacy",
+      "classification": "Replace",
+      "action": "Actualizar lista de steps del CI: eliminar item de lint legacy",
+      "reason": "El paso ya no existe en el CI"
+    },
+    {
+      "id": 8,
+      "file": ".github/workflows/ci.yml",
+      "line": 6,
+      "snippet": "# Steps: checkout, descargar Godot 4.6 headless, ejecutar smoke tests, lint legacy .log(, upload artifacts",
+      "reason_guess": "Comentario de cabecera del workflow menciona 'lint legacy .log(' como step",
+      "classification": "Replace",
+      "action": "Actualizar comentario de cabecera: eliminar mención de 'lint legacy .log('",
+      "reason": "El comentario describe el workflow desactualizado"
+    },
+    {
+      "id": 9,
+      "file": ".github/workflows/ci.yml",
+      "line": 110,
+      "snippet": "# 8. Lint: detectar patrones legacy .log( en el código",
+      "reason_guess": "Bloque completo del step de lint legacy en CI (líneas 109-151)",
+      "classification": "Delete",
+      "action": "Eliminar el step completo 'Check for legacy .log( patterns' (líneas 109-151). Agregar comentario explicando que fue removido porque la migración está completa.",
+      "reason": "La migración a write_event() está 100% completa; el step ya no cumple función de seguridad y genera ruido"
+    },
+    {
+      "id": 10,
+      "file": "papa-gallo/scripts/autoload/Logging.gd",
+      "line": "N/A",
+      "snippet": "N/A",
+      "reason_guess": "Verificar ausencia de compat-shim (función log(...) wrapper)",
+      "classification": "No action",
+      "action": "Sin cambios — Logging.gd ya solo expone write_event(), flush(), start_session(), get_session_id(), get_log_path(). No hay shims legacy.",
+      "reason": "El archivo ya está en estado canónico"
+    },
+    {
+      "id": 11,
+      "file": "papa-gallo/tools/smoke_test_enemy.gd",
+      "line": 291,
+      "snippet": "# Guardar log en disco (log de texto plano legacy).",
+      "reason_guess": "Comentario interno menciona 'legacy' en referencia a formato de texto plano vs JSON-lines",
+      "classification": "Ambiguous",
+      "action": "Revisión manual — el comentario usa 'legacy' para describir el formato de log de texto plano del smoke test (no es la API de Logging). No es una llamada ejecutable al logger antiguo.",
+      "reason": "El término 'legacy' en este contexto describe el formato del archivo de texto del smoke test, no el API de Logging. Dejar para revisión."
+    },
+    {
+      "id": 12,
+      "file": "papa-gallo/scripts/autoload/Logging.gd",
+      "line": 68,
+      "snippet": "@export var enable_remote_upload: bool = false",
+      "reason_guess": "Variable enable_remote_upload / remote_endpoint — referenciadas en docs como 'Option B'",
+      "classification": "Ambiguous",
+      "action": "Revisión manual — estas variables son placeholders arquitecturales documentados en TDD_GODOT_4_6.md §4.3. No son código legacy; son preparación intencional para integración remota futura.",
+      "reason": "No se deben eliminar; son parte del diseño forward-looking. El nombre 'remote_upload' no indica legacy."
+    },
+    {
+      "id": 13,
+      "file": "tools/logging_migration_report.md",
+      "line": "6-20",
+      "snippet": "- `Logging.log(` ... | `Logging.log(` | **0** |",
+      "reason_guess": "Reporte de migración documenta la ausencia de llamadas legacy (0 ocurrencias)",
+      "classification": "No action",
+      "action": "Sin cambios — este archivo es un reporte histórico que confirma la migración completada. Útil como artefacto de auditoría.",
+      "reason": "Archivo de reporte histórico; no contiene código ejecutable ni instrucciones a usuarios"
+    }
+  ],
+  "gd_executable_scan": {
+    "patterns_searched": ["\\blog\\s*\\(", "Logging\\.log\\s*\\("],
+    "files_scanned": ["papa-gallo/scripts/**/*.gd", "papa-gallo/tools/*.gd", "tools/*.gd"],
+    "matches_found": 0,
+    "verdict": "CLEAN — Ninguna llamada ejecutable legacy en archivos GDScript activos"
+  },
+  "Logging_gd_shim_scan": {
+    "file": "papa-gallo/scripts/autoload/Logging.gd",
+    "functions_exported": ["write_event(entry: Dictionary)", "flush()", "start_session(metadata)", "get_session_id()", "get_log_path()"],
+    "legacy_shims_found": [],
+    "verdict": "CLEAN — Solo API canónica exportada"
+  }
+}

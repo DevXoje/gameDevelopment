@@ -17,7 +17,7 @@
 ##
 ## Nota sobre Logging en modo headless:
 ##   El Autoload Logging NO está disponible en scripts headless que extienden SceneTree.
-##   Este script instancia Logging manualmente y llama a start_session() + write_event() + flush()
+##   Este script instancia Logging manualmente y llama a start_session() + log() + flush()
 ##   para garantizar que los eventos de smoke test se persistan en disco.
 
 extends SceneTree

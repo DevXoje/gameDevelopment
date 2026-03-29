@@ -41,7 +41,7 @@ signal player_died
 @onready var sprite: Sprite2D = $Sprite2D
 
 # CHANGED: safe logging accessor — referencia cacheada al Autoload Logging (null si no disponible).
-var _logger: Node = null
+var _logger = null
 
 ## Color normal del sprite.
 const COLOR_NORMAL := Color(1.0, 1.0, 1.0, 1.0)

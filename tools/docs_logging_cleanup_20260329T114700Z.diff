@@ -1,0 +1,124 @@
+--- a/docs/TDD_GODOT_4_6.md
++++ b/docs/TDD_GODOT_4_6.md
+@@ -236,7 +236,7 @@
+ ```gdscript
+-# Registrar cualquier evento desde cualquier script
+-Logging.log("info", "my_event", {"key": "value"})
++# Registrar cualquier evento desde cualquier script (API canónica)
++Logging.write_event({"level": "info", "event": "my_event", "data": {"key": "value"}})
+ 
+ # Forzar escritura a disco (útil antes de operaciones críticas)
+ Logging.flush()
+@@ -268,7 +268,7 @@
+ ### Limitaciones conocidas
+ 
+-- Las escrituras son **síncronas** (open/write/close por flush) — evitar `log()` en `_physics_process()`.
++- Las escrituras son **síncronas** (open/write/close por flush) — evitar `write_event()` en `_physics_process()`.
+ - En modo headless (scripts de smoke test), el Timer no está disponible; se usa `auto_flush_count = 1` para flush inmediato.
+ - Los archivos de log **no están encriptados** — no incluir PII en los campos `data`.
+--- a/docs/CI_RUNBOOK.md
++++ b/docs/CI_RUNBOOK.md
+@@ -44,12 +44,6 @@
+ | 5. Smoke tests   |  tools/run_all_tests.sh
+ |                  |  → papa-gallo/tools/smoke_test_*.gd
+ +------------------+
+-         |
+-         v
+-+------------------+
+-| 6. Lint legacy   |  grep -rn '.log(' en *.gd
+-|    .log()        |  FALLA si encuentra llamadas obsoletas
+-+------------------+
+          |
+          v
+ +------------------+
+-| 7. Upload logs   |  actions/upload-artifact@v4
++| 6. Upload logs   |  actions/upload-artifact@v4
+ |                  |  papa-gallo/logs/** → 14 dias retencion
+ +------------------+
+@@ -124,32 +118,6 @@
+ | smoke_test_enemy | `papa-gallo/tools/smoke_test_enemy.gd` | Sistema de oleadas (scripts existen, spawn funciona, enemigo persigue) |
+ 
+-### 2.6 Lint de legacy `.log()`
+-
+-El proyecto migro de `Logging.log()` a `Logging.write_event()`. Este step:
+-
+-1. Busca el patron `.log(` en archivos `.gd`
+-2. Excluye falsos positivos:
+-   - Comentarios (`#`, `##`)
+-   - Funciones internas (`_log(`, `_save_log`, `get_log_path`, etc.)
+-   - Cache del editor (`.godot/`)
+-3. Si encuentra matches, **el build falla** con mensaje descriptivo
+-
+-**Patrones excluidos (no son falsos positivos):**
+-- `_log(` — funcion interna de los smoke tests
+-- `get_log_path` — metodo del sistema de Logging
+-- `log_path`, `max_log_files`, `_log_lines`, `_save_log` — variables/funciones internas
+-- `CHANGED_FOR_LOGGING` — marcador de migracion en comentarios
+-
+-### 2.7 Upload de Logs
++### 2.6 Upload de Logs
+ 
+ - **Artifact name:** `papa-gallo-test-logs`
+@@ -244,20 +212,6 @@
+ - **Retencion:** 14 dias
+ - **Condicion:** `if: always()` — se sube incluso si los tests fallan (para diagnostico)
+ - Si no hay archivos de log, muestra warning pero no falla
+-
+-### 5.3 El CI falla en "Check for legacy .log( patterns"
+-
+-**Sintoma:** El step de lint encuentra llamadas `.log(`.
+-
+-**Solucion:**
+-1. Leer el mensaje de error — muestra archivo y linea exactos
+-2. Reemplazar la llamada `.log(...)` por `write_event({...})`
+-3. Referencia: `tools/logging_migration_report.md`
+-
+-**Ejemplo de migracion:**
+-```gdscript
+-# ANTES (legacy — fallara CI):
+-Logging.log("info", "round_started", {"round": round})
+-
+-# DESPUES (correcto):
+-Logging.write_event({
+-    "level": "info",
+-    "event": "round_started",
+-    "data": {"round": round}
+-})
+-```
+--- a/docs/SETUP_DEV_ENV.md
++++ b/docs/SETUP_DEV_ENV.md
+@@ -513,23 +513,6 @@
+-### 12.3 Verificar que no hay llamadas legacy `.log()`
+-
+-El CI falla si encuentra llamadas `.log()` en archivos GDScript (la API correcta es `Logging.write_event()`).
+-
+-Para verificar localmente:
+-```bash
+-# Buscar patrones legacy (debería no devolver nada)
+-grep -rn '\.log(' --include='*.gd' papa-gallo/ tools/ \
+-  | grep -v '^\s*#' \
+-  | grep -v '_log(' \
+-  | grep -v 'get_log_path' \
+-  | grep -v 'log_path' \
+-  | grep -v 'CHANGED_FOR_LOGGING'
+-```
+-
+-Si el comando devuelve lineas, esas llamadas deben migrar a `write_event()`. Ver `tools/logging_migration_report.md`.
+-
+-### 12.4 Que hace el CI
++### 12.3 Que hace el CI
+ 
+ El pipeline de GitHub Actions (`.github/workflows/ci.yml`) ejecuta en `ubuntu-latest`:
+ 
+ 1. **Checkout** del repositorio
+ 2. **Download** de Godot 4.6 headless para Linux (con cache)
+ 3. **Import** del proyecto Godot (genera `.godot/imported/`)
+ 4. **Smoke tests** via `tools/run_all_tests.sh`
+-5. **Lint** de patrones legacy `.log(` — falla el build si los encuentra
+-6. **Upload** de logs (`papa-gallo/logs/**`) como artifacts (14 dias de retencion)
++5. **Upload** de logs (`papa-gallo/logs/**`) como artifacts (14 dias de retencion)
+ 
+ Para mas detalles, ver `docs/CI_RUNBOOK.md`.
+ 
+-### 12.5 Como agregar un nuevo test
++### 12.4 Como agregar un nuevo test
