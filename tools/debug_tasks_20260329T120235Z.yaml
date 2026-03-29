@@ -1,0 +1,395 @@
+# Debug Autoload & In-Game Tooling — Backlog de Tareas
+# Proyecto: gameDevelopment / papa-gallo
+# Generado: 2026-03-29T12:02:35Z
+# Ref: debug_mvp_proposal_20260329T120235Z.md
+
+meta:
+  project: "gameDevelopment / papa-gallo"
+  scope: "Debug Autoload & in-game tooling"
+  generated_at: "2026-03-29T12:02:35Z"
+  total_tasks: 12
+  note: >
+    Todas las tareas son PR-sized (20-120 minutos).
+    Ordenadas por prioridad descendente.
+    Las tareas de MVP-1 son requisito previo para MVP-2 y MVP-3.
+
+tasks:
+
+  # ============================================================
+  # BLOQUE 1: Decisión previa (5 minutos — no es código)
+  # ============================================================
+
+  - id: "TASK-00"
+    title: "Decidir hotkeys y comportamiento del debug HUD"
+    priority: critical
+    milestone: "pre-implementation"
+    status: pending
+    estimated_effort: "small"
+    estimated_minutes: 5
+    description: >
+      El equipo debe confirmar: (1) ¿F-keys (F1-F5) o Ctrl+combos para hotkeys de debug?
+      (2) ¿Debug HUD visible por defecto o solo al presionar F1?
+      (3) ¿Nombre exacto del archivo de escena del enemigo? (Enemy.tscn, enemy_zombie.tscn, etc.)
+      (4) Confirmar que el enfoque runtime (no project.godot) para registrar hotkeys es correcto.
+    blocker_for: ["TASK-01", "TASK-02", "TASK-04"]
+    files_to_change: []
+    tests_to_add: []
+    acceptance_criteria:
+      - "Decisión documentada como comentario en DebugManager.gd o en el PR"
+
+  # ============================================================
+  # BLOQUE 2: MVP-1 — DebugManager Funcional (Core)
+  # ============================================================
+
+  - id: "TASK-01"
+    title: "Añadir detección headless y flag _is_headless en DebugManager"
+    priority: high
+    milestone: "MVP-1"
+    status: pending
+    estimated_effort: "small"
+    estimated_minutes: 30
+    description: >
+      Añadir en DebugManager._ready() la detección de modo headless usando
+      DisplayServer.get_name() == "headless" (mismo patrón que Logging.gd).
+      Guardar en variable _is_headless: bool.
+      En modo headless, saltear _register_debug_actions() y la creación del HUD,
+      pero mantener las funciones de debug (debug_next_wave, debug_spawn_enemy, etc.)
+      operativas para uso en smoke tests.
+    depends_on: []
+    blocker_for: ["TASK-02", "TASK-04"]
+    files_to_change:
+      - "papa-gallo/scripts/autoload/DebugManager.gd"
+    tests_to_add:
+      - "Verificar en smoke_test_enemy.gd que DebugManager.debug_next_wave() no lanza errores en headless"
+    acceptance_criteria:
+      - "_is_headless detectado correctamente en modo headless"
+      - "No hay errores al cargar DebugManager en modo headless"
+      - "debug_next_wave() funcional en headless (puede usarse desde smoke tests)"
+
+  - id: "TASK-02"
+    title: "Implementar _register_debug_actions() con hotkeys F1-F5"
+    priority: high
+    milestone: "MVP-1"
+    status: pending
+    estimated_effort: "small"
+    estimated_minutes: 60
+    description: >
+      Completar _register_debug_actions() solo si _is_debug == true y _is_headless == false.
+      Registrar acciones via InputMap.add_action() + InputMap.action_add_event() en runtime:
+      - F1 → 'debug_toggle_hud'
+      - F2 → 'debug_next_wave'
+      - F3 → 'debug_spawn_enemy'
+      - F4 → 'debug_teleport_origin'
+      - F5 → 'debug_verbose_state'
+      Implementar _input(event: InputEvent) para dispatchar a cada función.
+      Las acciones NO deben añadirse al project.godot (solo runtime).
+    depends_on: ["TASK-01"]
+    blocker_for: ["TASK-04"]
+    files_to_change:
+      - "papa-gallo/scripts/autoload/DebugManager.gd"
+    tests_to_add:
+      - "Verificar que las acciones debug_* NO están en el InputMap al iniciar en release"
+    acceptance_criteria:
+      - "F2 llama a debug_next_wave() cuando _is_debug == true"
+      - "F3 llama a debug_spawn_enemy('zombie') cuando _is_debug == true"
+      - "En builds de release, _register_debug_actions() no se llama"
+      - "En headless, _register_debug_actions() no se llama"
+
+  - id: "TASK-03"
+    title: "Implementar debug_spawn_enemy() con carga real de PackedScene"
+    priority: high
+    milestone: "MVP-1"
+    status: pending
+    estimated_effort: "small"
+    estimated_minutes: 45
+    description: >
+      Completar debug_spawn_enemy(enemy_type: String = "zombie"):
+      1. Construir path: "res://scenes/enemies/enemy_%s.tscn" % enemy_type
+         (verificar nombre real del archivo antes de implementar)
+      2. if ResourceLoader.exists(path): cargar y añadir a current_scene
+      3. Posicionar en global_position del jugador (usar grupo 'player') + Vector2(50, 0)
+      4. Llamar Logging.write_event() con level='debug', event='debug_spawn_enemy',
+         data={'enemy_type': enemy_type}
+      5. Si la escena no existe: push_warning con path esperado
+    depends_on: ["TASK-01"]
+    blocker_for: []
+    files_to_change:
+      - "papa-gallo/scripts/autoload/DebugManager.gd"
+    tests_to_add:
+      - "Añadir verificación en smoke_test_enemy.gd: DebugManager.debug_spawn_enemy() en headless no crash"
+    acceptance_criteria:
+      - "debug_spawn_enemy('zombie') instancia el enemigo en la escena actual"
+      - "El enemigo aparece cerca del jugador"
+      - "Si la escena no existe, imprime un warning claro con el path esperado"
+      - "Se registra evento en el log JSON-lines de Logging"
+
+  - id: "TASK-04"
+    title: "Implementar debug_teleport_player() usando grupo 'player'"
+    priority: medium
+    milestone: "MVP-1"
+    status: pending
+    estimated_effort: "small"
+    estimated_minutes: 30
+    description: >
+      Completar debug_teleport_player(pos: Vector2):
+      1. var players = get_tree().get_nodes_in_group('player')
+      2. if players.is_empty(): push_warning y return
+      3. players[0].global_position = pos
+      4. Logging.write_event() con event='debug_teleport_player', data={'pos': str(pos)}
+      El hotkey F4 llamará a debug_teleport_player(Vector2.ZERO) como teleport rápido al origen.
+      Asegurarse de que player.gd llame add_to_group('player') en _ready() (ya es convención
+      establecida en smoke_test_enemy.gd).
+    depends_on: ["TASK-01", "TASK-02"]
+    blocker_for: []
+    files_to_change:
+      - "papa-gallo/scripts/autoload/DebugManager.gd"
+      - "papa-gallo/scripts/player.gd (verificar que add_to_group('player') existe)"
+    tests_to_add: []
+    acceptance_criteria:
+      - "F4 teletransporta al jugador a Vector2.ZERO"
+      - "debug_teleport_player(Vector2(100, 200)) funciona cuando hay un jugador en escena"
+      - "push_warning si no hay nodo en grupo 'player'"
+
+  - id: "TASK-05"
+    title: "Integrar Logging.write_event() en todas las acciones de DebugManager"
+    priority: medium
+    milestone: "MVP-1"
+    status: pending
+    estimated_effort: "small"
+    estimated_minutes: 30
+    description: >
+      Añadir llamadas a Logging.write_event() en:
+      - debug_next_wave(): event='debug_next_wave', data={'round': gm.current_round}
+      - print_state(): event='debug_print_state', data={round, is_running, puntos}
+      Y verificar que TASK-03 y TASK-04 también incluyen sus llamadas a Logging.
+      Usar level='debug' para todos los eventos de DebugManager.
+    depends_on: ["TASK-03", "TASK-04"]
+    blocker_for: []
+    files_to_change:
+      - "papa-gallo/scripts/autoload/DebugManager.gd"
+    tests_to_add:
+      - "Verificar que el log JSON-lines contiene eventos debug_* después de acciones de debug"
+    acceptance_criteria:
+      - "Cada acción de debug genera un evento en el log JSON-lines"
+      - "Los eventos tienen level='debug' y event con prefijo 'debug_'"
+      - "Los eventos incluyen datos relevantes (round, pos, enemy_type)"
+
+  # ============================================================
+  # BLOQUE 3: MVP-2 — Debug HUD
+  # ============================================================
+
+  - id: "TASK-06"
+    title: "Crear escena debug_hud.tscn con labels básicos"
+    priority: medium
+    milestone: "MVP-2"
+    status: pending
+    estimated_effort: "small"
+    estimated_minutes: 45
+    description: >
+      Crear papa-gallo/scenes/ui/debug_hud.tscn con estructura:
+      CanvasLayer (layer=100) > Panel > VBoxContainer > Labels:
+      - Label: "FPS: {n}"
+      - Label: "Player: ({x}, {y})"
+      - Label: "Ronda: {n}"
+      - Label: "Session: {id}"
+      El script debug_hud.gd actualizará los labels en _process() cada ~1 segundo
+      usando un Timer interno para evitar overhead.
+    depends_on: ["TASK-01"]
+    blocker_for: ["TASK-07"]
+    files_to_change:
+      - "papa-gallo/scenes/ui/debug_hud.tscn (nuevo)"
+      - "papa-gallo/scripts/ui/debug_hud.gd (nuevo)"
+    tests_to_add:
+      - "Añadir check en smoke tests: ResourceLoader.exists('res://scenes/ui/debug_hud.tscn')"
+    acceptance_criteria:
+      - "La escena carga sin errores"
+      - "Los 4 labels están presentes con valores actualizados"
+      - "El HUD no bloquea el input de juego"
+      - "El FPS se actualiza en tiempo real"
+
+  - id: "TASK-07"
+    title: "Integrar debug_hud en DebugManager con toggle F1"
+    priority: medium
+    milestone: "MVP-2"
+    status: pending
+    estimated_effort: "small"
+    estimated_minutes: 60
+    description: >
+      En DebugManager._ready() (si _is_debug y not _is_headless):
+      - Cargar y añadir debug_hud.tscn como hijo
+      - Ocultar por defecto (visible = false)
+      El hotkey F1 llama a _toggle_debug_hud() que alterna visible.
+      Añadir Logging.write_event() con event='debug_hud_toggled'.
+    depends_on: ["TASK-06", "TASK-02"]
+    blocker_for: []
+    files_to_change:
+      - "papa-gallo/scripts/autoload/DebugManager.gd"
+    tests_to_add: []
+    acceptance_criteria:
+      - "F1 muestra el debug HUD cuando está oculto"
+      - "F1 oculta el debug HUD cuando está visible"
+      - "El HUD empieza oculto por defecto"
+      - "En headless, no hay intento de cargar la escena HUD"
+
+  # ============================================================
+  # BLOQUE 4: MVP-3 — Verbose State Inspector
+  # ============================================================
+
+  - id: "TASK-08"
+    title: "Implementar print_verbose_state() y hotkey F5"
+    priority: low
+    milestone: "MVP-3"
+    status: pending
+    estimated_effort: "small"
+    estimated_minutes: 60
+    description: >
+      Añadir función print_verbose_state() en DebugManager:
+      1. Imprimir sección GameManager: current_round, is_running, puntos
+      2. Imprimir sección Logging: get_session_id(), get_log_path()
+      3. Imprimir sección SaveManager: has_save(0)
+      4. Imprimir sección DebugManager: _is_debug, _is_headless
+      5. Llamar Logging.write_event() con event='debug_verbose_state' y todo el dump como data
+      El hotkey F5 dispara esta función.
+    depends_on: ["TASK-02", "TASK-05"]
+    blocker_for: []
+    files_to_change:
+      - "papa-gallo/scripts/autoload/DebugManager.gd"
+    tests_to_add: []
+    acceptance_criteria:
+      - "F5 imprime dump completo en consola"
+      - "El dump incluye estado de todos los autoloads"
+      - "El evento se registra en el log JSON-lines"
+      - "Funciona también en headless (solo print, sin HUD)"
+
+  # ============================================================
+  # BLOQUE 5: Consolidación CI/Tools
+  # ============================================================
+
+  - id: "TASK-09"
+    title: "Verificar y consolidar archivos smoke_test_player duplicados"
+    priority: medium
+    milestone: "CI-cleanup"
+    status: pending
+    estimated_effort: "small"
+    estimated_minutes: 30
+    description: >
+      ATENCIÓN: Existen dos archivos smoke_test_player.gd:
+      - /tools/smoke_test_player.gd (en raíz del repo)
+      - /papa-gallo/tools/smoke_test_player.gd
+      
+      Verificar si son el mismo contenido o versiones distintas.
+      Decidir cuál es el canónico. El que ejecuta el CI via run_all_tests.sh debe ser el canónico.
+      Eliminar o deprecar el duplicado.
+      Actualizar run_all_tests.sh si es necesario.
+    depends_on: []
+    blocker_for: []
+    files_to_change:
+      - "tools/run_all_tests.sh (verificar paths)"
+      - "tools/smoke_test_player.gd o papa-gallo/tools/smoke_test_player.gd (uno de los dos)"
+    tests_to_add: []
+    acceptance_criteria:
+      - "Solo existe un smoke_test_player.gd en el repositorio (o están claramente diferenciados)"
+      - "run_all_tests.sh referencia el path correcto"
+      - "El CI pasa sin errores de archivo no encontrado"
+
+  - id: "TASK-10"
+    title: "Verificar que run_all_tests.sh ejecuta ambos smoke tests"
+    priority: low
+    milestone: "CI-cleanup"
+    status: pending
+    estimated_effort: "small"
+    estimated_minutes: 20
+    description: >
+      Leer tools/run_all_tests.sh (y papa-gallo/tools/run_all_tests.sh si existe).
+      Confirmar que ejecuta smoke_test_player.gd y smoke_test_enemy.gd.
+      Si falta alguno, añadirlo.
+      Marcar SE-003 y SP-002 como DONE si ya están incluidos.
+    depends_on: ["TASK-09"]
+    blocker_for: []
+    files_to_change:
+      - "tools/run_all_tests.sh"
+    tests_to_add: []
+    acceptance_criteria:
+      - "El script ejecuta ambos smoke tests"
+      - "Los exit codes se propagan correctamente (si uno falla, el script retorna 1)"
+
+  # ============================================================
+  # BLOQUE 6: Documentación
+  # ============================================================
+
+  - id: "TASK-11"
+    title: "Actualizar sección DebugManager en TDD_GODOT_4_6.md"
+    priority: low
+    milestone: "docs"
+    status: pending
+    estimated_effort: "small"
+    estimated_minutes: 30
+    description: >
+      Después de completar TASK-01 a TASK-05 (MVP-1), actualizar docs/TDD_GODOT_4_6.md:
+      - Sección 4.1 DebugManager: añadir tabla de hotkeys (F1-F5)
+      - Documentar integración con Logging (eventos debug_*)
+      - Documentar comportamiento headless vs GUI
+      - Añadir columna 'Estado' a la tabla de Autoloads (Implementado / Skeleton)
+    depends_on: ["TASK-05"]
+    blocker_for: []
+    files_to_change:
+      - "docs/TDD_GODOT_4_6.md"
+    tests_to_add: []
+    acceptance_criteria:
+      - "La tabla de hotkeys está documentada con F-keys y sus acciones"
+      - "Se menciona la integración con Logging y los eventos generados"
+      - "El estado de cada autoload refleja el estado real de implementación"
+
+  # ============================================================
+  # Futuro / Post-MVP (fuera del scope actual)
+  # ============================================================
+
+  - id: "TASK-12"
+    title: "[FUTURO] Añadir check de señales en smoke_test_enemy (SE-001)"
+    priority: low
+    milestone: "post-MVP"
+    status: backlog
+    estimated_effort: "medium"
+    estimated_minutes: 90
+    description: >
+      Añadir Check 5 en smoke_test_enemy.gd para verificar que las señales
+      enemy_spawned y wave_started se emiten correctamente durante spawn_wave(2).
+      Requiere que las señales estén definidas en Spawner/RoundManager.
+      Verificar si están declaradas antes de implementar.
+    depends_on: ["TASK-09", "TASK-10"]
+    blocker_for: []
+    files_to_change:
+      - "papa-gallo/tools/smoke_test_enemy.gd"
+    tests_to_add: []
+    acceptance_criteria:
+      - "El nuevo Check 5 verifica que enemy_spawned se emite al menos 2 veces tras spawn_wave(2)"
+      - "El check usa el patrón de flag bool conectado a la señal"
+
+# ============================================================
+# Resumen de estimaciones
+# ============================================================
+summary:
+  total_tasks: 13  # TASK-00 a TASK-12
+  total_estimated_minutes_min: 395
+  total_estimated_minutes_max: 490
+  total_estimated_hours: "6.5h - 8h"
+
+  by_milestone:
+    pre-implementation: {tasks: 1, minutes: 5}
+    MVP-1: {tasks: 5, minutes: "195-225min (3.5-4h)"}
+    MVP-2: {tasks: 2, minutes: "105min (~2h)"}
+    MVP-3: {tasks: 1, minutes: "60min (~1h)"}
+    CI-cleanup: {tasks: 2, minutes: "50min (~1h)"}
+    docs: {tasks: 1, minutes: "30min"}
+    post-MVP: {tasks: 1, minutes: "90min — después del MVP"}
+
+  recommended_pr_order:
+    1: "TASK-00 — Decisión de equipo (no es código)"
+    2: "TASK-09 — Consolidar duplicados (deuda técnica rápida)"
+    3: "TASK-01 + TASK-02 — Base de DebugManager funcional"
+    4: "TASK-03 + TASK-04 + TASK-05 — Completar acciones + Logging"
+    5: "TASK-10 — Verificar CI"
+    6: "TASK-06 + TASK-07 — Debug HUD"
+    7: "TASK-08 — Verbose inspector"
+    8: "TASK-11 — Documentación"
+    9: "TASK-12 — Señales en smoke test (post-MVP)"

@@ -1,0 +1,140 @@
+meta:
+  project: gameDevelopment
+  change_name: debug-manager-mvp1
+  generated_at: "20260329T123718Z"
+  scope: "MVP-1 DebugManager + smoke tests"
+  canonical_smoke_test_player: "papa-gallo/tools/smoke_test_player.gd"
+
+tasks:
+  - id: DM-T1
+    title: "Bootstrap headless-safe DebugManager"
+    description: >
+      En `papa-gallo/scripts/autoload/DebugManager.gd`, agregar `_is_headless: bool`, helper
+      `_detect_headless() -> bool` y guardas en `_ready()` para espejar `Logging.gd`:
+      `OS.has_feature('headless') or not DisplayServer.has_screen()` (fallback: `DisplayServer.get_name() == 'headless'`).
+      No instanciar `DebugHUD`, `CanvasLayer`, `Control` ni consola visual cuando `_is_headless == true`.
+    files_to_change:
+      - papa-gallo/scripts/autoload/DebugManager.gd
+    tests_to_add:
+      - "papa-gallo/tools/smoke_test_enemy.gd: assert `DebugManager.get_node_or_null('DebugHUD') == null` con mensaje 'DebugHUD must not exist in headless'"
+      - "papa-gallo/tools/smoke_test_enemy.gd: assert log contiene `\"headless\":true` tras una acción debug"
+    estimated_hours: 0.75
+    priority: critical
+    dependencies: []
+
+  - id: DM-T2
+    title: "Registrar hotkeys F1-F5 y dispatcher runtime-only"
+    description: >
+      Completar `_register_debug_actions()` y `_input(event: InputEvent)` en
+      `papa-gallo/scripts/autoload/DebugManager.gd`. Registrar `debug_toggle_hud`, `debug_next_wave`,
+      `debug_spawn_enemy`, `debug_teleport_player`, `debug_toggle_console` con `KEY_F1..KEY_F5`
+      usando `InputMap.add_action()` + `InputMap.action_add_event()` solo en debug GUI builds.
+    files_to_change:
+      - papa-gallo/scripts/autoload/DebugManager.gd
+    tests_to_add:
+      - "papa-gallo/tools/smoke_test_enemy.gd: assert `not InputMap.has_action('debug_toggle_hud')` en headless"
+      - "tools/check_input_map.gd o smoke helper: verificar strings `debug_next_wave`, `debug_spawn_enemy`, `debug_toggle_console` solo cuando no headless"
+    estimated_hours: 1.0
+    priority: high
+    dependencies: [DM-T1]
+
+  - id: DM-T3
+    title: "Implementar debug_next_wave() con evento estructurado"
+    description: >
+      En `DebugManager.gd`, completar `debug_next_wave() -> void` para llamar el flujo del juego
+      (ej. `GameManager.end_round()` + `GameManager.start_round()`) y luego emitir
+      `Logging.write_event(..., 'debug_next_wave', {source:'F2', round_before, round_after, timestamp})`.
+      Si `GameManager` no está disponible, usar `push_warning` sin crash.
+    files_to_change:
+      - papa-gallo/scripts/autoload/DebugManager.gd
+    tests_to_add:
+      - "papa-gallo/tools/smoke_test_enemy.gd: invocar `DebugManager.debug_next_wave()` y assert log contiene `\"event\":\"debug_next_wave\"`"
+      - "papa-gallo/tools/smoke_test_enemy.gd: assert log contiene `\"source\":\"F2\"`"
+    estimated_hours: 0.75
+    priority: high
+    dependencies: [DM-T1, DM-T2]
+
+  - id: DM-T4
+    title: "Implementar debug_spawn_enemy() con path explícito y telemetry"
+    description: >
+      Completar `debug_spawn_enemy(enemy_scene_path: String = 'res://scenes/enemies/Enemy.tscn', who: String = 'player') -> void`
+      en `DebugManager.gd`: validar `ResourceLoader.exists(enemy_scene_path)`, instanciar `PackedScene` en la escena actual,
+      usar `player.global_position + Vector2(50, 0)` si existe, y emitir `debug_spawn` con payload
+      `{source:'F3', who, scene: enemy_scene_path, spawn_position:[x,y], timestamp}`.
+    files_to_change:
+      - papa-gallo/scripts/autoload/DebugManager.gd
+    tests_to_add:
+      - "papa-gallo/tools/smoke_test_enemy.gd: assert log contiene `\"event\":\"debug_spawn\"`"
+      - "papa-gallo/tools/smoke_test_enemy.gd: assert log contiene `\"scene\":\"res://scenes/enemies/Enemy.tscn\"` o el path verificado"
+    estimated_hours: 1.0
+    priority: high
+    dependencies: [DM-T1, DM-T2]
+
+  - id: DM-T5
+    title: "Implementar debug_teleport_player() y F5 console toggle"
+    description: >
+      En `DebugManager.gd`, completar `debug_teleport_player(target_position: Vector2 = Vector2.ZERO) -> void`
+      buscando el primer nodo del grupo `player`, moviéndolo y emitiendo `debug_teleport` con
+      `{source:'F4', who:'player', from:[x,y], to:[x,y], timestamp}`. En la misma PR, agregar
+      `_toggle_dev_console() -> void`: si existe nodo `DevConsole`, alternar `visible`; si no, hacer `push_warning` y emitir
+      `debug_console_toggle` con `{source:'F5', visible, headless, timestamp}`.
+    files_to_change:
+      - papa-gallo/scripts/autoload/DebugManager.gd
+      - papa-gallo/scripts/player.gd
+    tests_to_add:
+      - "papa-gallo/tools/smoke_test_player.gd: después de `DebugManager.debug_teleport_player(Vector2.ZERO)`, assert `player.global_position == Vector2.ZERO`"
+      - "papa-gallo/tools/smoke_test_player.gd: assert log contiene `\"event\":\"debug_teleport\"` y `\"event\":\"debug_console_toggle\"`"
+    estimated_hours: 1.0
+    priority: high
+    dependencies: [DM-T1, DM-T2]
+
+  - id: DM-T6
+    title: "Crear DebugHUD oculto por defecto y cablear F1"
+    description: >
+      Crear `papa-gallo/scenes/ui/DebugHUD.tscn` y `papa-gallo/scripts/ui/DebugHUD.gd` con labels para FPS,
+      posición del jugador, ronda y `Logging.session_id`, refresco a 1 Hz. En `DebugManager.gd`, instanciarlo
+      solo si `not _is_headless`, guardar referencia `_debug_hud`, comenzar con `visible = false` y en
+      `_toggle_debug_hud()` alternar visibilidad + emitir `debug_hud_toggle` con `{source:'F1', visible, headless, timestamp}`.
+    files_to_change:
+      - papa-gallo/scripts/autoload/DebugManager.gd
+      - papa-gallo/scenes/ui/DebugHUD.tscn
+      - papa-gallo/scripts/ui/DebugHUD.gd
+    tests_to_add:
+      - "papa-gallo/tools/smoke_test_enemy.gd: assert `DebugManager.get_node_or_null('DebugHUD') == null` en headless"
+      - "GUI smoke/manual test: verificar string visible del HUD cambia tras F1 y log contiene `\"event\":\"debug_hud_toggle\"`"
+    estimated_hours: 1.5
+    priority: medium
+    dependencies: [DM-T1, DM-T2, DM-T3, DM-T4, DM-T5]
+
+  - id: DM-T7
+    title: "Actualizar smoke_test_enemy para headless + JSON event checks"
+    description: >
+      Extender `papa-gallo/tools/smoke_test_enemy.gd` para cubrir las rutas headless de `DebugManager`:
+      ejecutar `debug_next_wave()` y `debug_spawn_enemy()`, confirmar ausencia de HUD visual y validar en el log
+      JSON lines las cadenas `"event":"debug_next_wave"`, `"event":"debug_spawn"`, `"source":"F2"` y `"source":"F3"`.
+    files_to_change:
+      - papa-gallo/tools/smoke_test_enemy.gd
+    tests_to_add:
+      - "Nuevo bloque smoke: `assert_true(DebugManager.get_node_or_null('DebugHUD') == null, 'DebugHUD must not exist in headless')`"
+      - "Nuevo bloque smoke: leer últimas líneas del log y assert strings `\"event\":\"debug_next_wave\"` y `\"event\":\"debug_spawn\"`"
+    estimated_hours: 1.0
+    priority: high
+    dependencies: [DM-T3, DM-T4, DM-T6]
+
+  - id: DM-T8
+    title: "Consolidar smoke_test_player duplicado y actualizar checks de teleport/F5"
+    description: >
+      Identificar y comparar `tools/smoke_test_player.gd` y `papa-gallo/tools/smoke_test_player.gd`.
+      Mantener `papa-gallo/tools/smoke_test_player.gd` como canónico, preparar plan patch-ready para eliminar o deprecar el duplicado
+      de raíz, y actualizar `tools/run_all_tests.sh` para usar solo el path canónico. En el test canónico, añadir checks de
+      `debug_teleport_player(Vector2.ZERO)` y `debug_console_toggle` por log JSON.
+    files_to_change:
+      - tools/smoke_test_player.gd
+      - papa-gallo/tools/smoke_test_player.gd
+      - tools/run_all_tests.sh
+    tests_to_add:
+      - "papa-gallo/tools/smoke_test_player.gd: assert `player.global_position == Vector2.ZERO` tras teleport"
+      - "papa-gallo/tools/smoke_test_player.gd: assert log contiene `\"event\":\"debug_console_toggle\"` y `\"headless\":true` cuando aplique"
+    estimated_hours: 0.75
+    priority: medium
+    dependencies: [DM-T5, DM-T7]
